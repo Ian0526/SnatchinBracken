@@ -1,15 +1,15 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using HarmonyLib;
-using SnatchingBracken.Patches.data;
+using SnatchinBracken.Patches.data;
 using UnityEngine;
 
-namespace SnatchingBracken.Patches
+namespace SnatchinBracken.Patches
 {
     [HarmonyPatch(typeof(FlowermanAI))]
     internal class BrackenAIPatch
     {
-        private const string modGUID = "Ovchinikov.SnatchingBracken";
+        private const string modGUID = "Ovchinikov.SnatchinBracken";
 
         private static ManualLogSource mls;
 
@@ -82,13 +82,13 @@ namespace SnatchingBracken.Patches
         {
             if (__instance == null)
             {
-                mls.LogError("FlowermanAI instance is null in DropBodyPatch.");
+                mls.LogInfo("FlowermanAI instance is null in DropBodyPatch.");
                 return true;
             }
 
             if (!SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
-                mls.LogError("FlowermanAI instance not found in BindedDrags map.");
+                mls.LogInfo("FlowermanAI instance not found in BindedDrags map.");
                 return true;
             }
 

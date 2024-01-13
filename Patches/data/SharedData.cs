@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SnatchingBracken.Patches.data
+namespace SnatchinBracken.Patches.data
 {
     internal class SharedData
     {

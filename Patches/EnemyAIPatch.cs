@@ -1,10 +1,10 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using HarmonyLib;
-using SnatchingBracken.Patches.data;
+using SnatchinBracken.Patches.data;
 using UnityEngine;
 
-namespace SnatchingBracken.Patches
+namespace SnatchinBracken.Patches
 {
     [HarmonyPatch(typeof(EnemyAI))]
     internal class EnemyAIPatch

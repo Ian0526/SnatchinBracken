@@ -1,12 +1,12 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using SnatchingBracken.Patches;
+using SnatchinBracken.Patches;
 
-namespace SnatchingBracken
+namespace SnatchinBracken
 {
     [BepInPlugin(modGUID, modName, modVersion)]
-    public class SnatchingBrackenBase : BaseUnityPlugin
+    public class SnatchinBrackenBase : BaseUnityPlugin
     {
         private const string modGUID = "Ovchinikov.SnatchingBracken";
         private const string modName = "SnatchingBracken";
@@ -14,7 +14,7 @@ namespace SnatchingBracken
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
-        private static SnatchingBrackenBase instance;
+        private static SnatchinBrackenBase instance;
 
         internal ManualLogSource mls;
 
@@ -28,7 +28,7 @@ namespace SnatchingBracken
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
             mls.LogInfo("Enabling Snatching Bracken");
 
-            harmony.PatchAll(typeof(SnatchingBrackenBase));
+            harmony.PatchAll(typeof(SnatchinBrackenBase));
             harmony.PatchAll(typeof(BrackenAIPatch));
             harmony.PatchAll(typeof(EnemyAIPatch));
         }
