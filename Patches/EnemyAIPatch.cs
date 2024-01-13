@@ -12,8 +12,7 @@ namespace SnatchingBracken.Patches
         private const string modGUID = "Ovchinikov.SnatchinBracken";
         private static ManualLogSource mls;
 
-        private static long maxWait = 15000L;
-        private static long lastGrabbed = 0L;
+        private static float maxWait = 15000L;
 
         static EnemyAIPatch()
         {
@@ -31,6 +30,7 @@ namespace SnatchingBracken.Patches
             PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(flowermanAI);
             int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
             UpdatePosition(flowermanAI, player);
+            float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
 
             if (Time.time - lastGrabbed >= maxWait)
             {

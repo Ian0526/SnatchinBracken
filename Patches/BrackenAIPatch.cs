@@ -44,6 +44,7 @@ namespace SnatchingBracken.Patches
 
             SharedData.Instance.BindedDrags[__instance] = player;
             SharedData.Instance.PlayerIDs[player] = playerObjectId;
+            SharedData.Instance.LastGrabbedTimeStamp[__instance] = Time.time;
 
             Transform transform = __instance.ChooseFarthestNodeFromPosition(RoundManager.FindMainEntrancePosition());
             if (__instance.favoriteSpot == null)
@@ -59,7 +60,11 @@ namespace SnatchingBracken.Patches
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
         {
-            ManuallyDropPlayerOnHit(__instance, playerWhoHit);
+            if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
+            {
+                ManuallyDropPlayerOnHit(__instance, playerWhoHit);
+                SharedData.Instance.BindedDrags.Remove(__instance);
+            }
         }
 
         // same as above
@@ -99,6 +104,7 @@ namespace SnatchingBracken.Patches
 
             player.inSpecialInteractAnimation = false;
             SharedData.Instance.BindedDrags.Remove(__instance);
+            SharedData.Instance.LastGrabbedTimeStamp.Remove(__instance);
             __instance.carryingPlayerBody = false;
             __instance.bodyBeingCarried = null;
             __instance.creatureAnimator.SetBool("carryingBody", value: false);
