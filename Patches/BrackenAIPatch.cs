@@ -39,6 +39,7 @@ namespace SnatchinBracken.Patches
             __instance.creatureAnimator.SetBool("carryingBody", value: true);
             __instance.carryingPlayerBody = true;
             player.inSpecialInteractAnimation = true;
+            player.DropAllHeldItems();
             __instance.inKillAnimation = false;
             __instance.targetPlayer = null;
 
