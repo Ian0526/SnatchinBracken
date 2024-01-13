@@ -93,7 +93,7 @@ namespace SnatchingBracken.Patches
             if (player == null)
             {
                 mls.LogError("PlayerControllerB instance is null in BindedDrags map.");
-                SharedData.Instance.BindedDrags.Remove(__instance); // Clean up the map
+                SharedData.Instance.BindedDrags.Remove(__instance);
                 return true;
             }
 
@@ -103,23 +103,6 @@ namespace SnatchingBracken.Patches
             __instance.bodyBeingCarried = null;
             __instance.creatureAnimator.SetBool("carryingBody", value: false);
             FinishKillAnimationNormally(__instance, player, id);
-            return false;
-        }
-
-        static void ImmediatelyChangeStatesAfterKill(FlowermanAI __instance)
-        {
-            __instance.evadeStealthTimer = 0f;
-            __instance.SwitchToBehaviourState(0);
-            __instance.carryingPlayerBody = false;
-            __instance.bodyBeingCarried = null;
-        }
-
-        static bool IsBrackenDoneDragging(FlowermanAI __instance)
-        {
-            if (__instance.favoriteSpot != null && Vector3.Distance(__instance.transform.position, __instance.favoriteSpot.transform.position) < 5f)
-            {
-                return true;
-            }
             return false;
         }
 

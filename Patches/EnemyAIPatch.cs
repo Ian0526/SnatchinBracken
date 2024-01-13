@@ -12,6 +12,9 @@ namespace SnatchingBracken.Patches
         private const string modGUID = "Ovchinikov.SnatchinBracken";
         private static ManualLogSource mls;
 
+        private static long maxWait = 15000L;
+        private static long lastGrabbed = 0L;
+
         static EnemyAIPatch()
         {
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
@@ -26,7 +29,13 @@ namespace SnatchingBracken.Patches
                 return;
             }
             PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(flowermanAI);
+            int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
             UpdatePosition(flowermanAI, player);
+
+            if (Time.time - lastGrabbed >= maxWait)
+            {
+                FinishKillAnimationNormally(flowermanAI, player, id);
+            }
         }
 
         [HarmonyPrefix]
@@ -39,7 +48,14 @@ namespace SnatchingBracken.Patches
         static void UpdatePosition(FlowermanAI __instance, PlayerControllerB player)
         {
             player.transform.position = __instance.transform.position;
-            float distance = Vector3.Distance(__instance.transform.position, __instance.favoriteSpot.position);
+        }
+
+        static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
+        {
+            mls.LogInfo("Bracken found good spot to kill, killing player.");
+            __instance.inSpecialAnimationWithPlayer = playerControllerB;
+            playerControllerB.inSpecialInteractAnimation = true;
+            __instance.KillPlayerAnimationClientRpc(playerId);
         }
     }
 }
