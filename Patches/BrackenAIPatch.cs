@@ -54,6 +54,7 @@ namespace SnatchingBracken.Patches
             return false;
         }
 
+        // ngl didn't test this yet, all my friends sleepin
         [HarmonyPrefix]
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
@@ -61,6 +62,7 @@ namespace SnatchingBracken.Patches
             ManuallyDropPlayerOnHit(__instance, playerWhoHit);
         }
 
+        // same as above
         private static void ManuallyDropPlayerOnHit(FlowermanAI __instance, PlayerControllerB player)
         {
             player.inSpecialInteractAnimation = false;
@@ -95,7 +97,6 @@ namespace SnatchingBracken.Patches
                 return true;
             }
 
-            mls.LogInfo("Found controller, releasing player from special interaction.");
             player.inSpecialInteractAnimation = false;
             SharedData.Instance.BindedDrags.Remove(__instance);
             __instance.carryingPlayerBody = false;
@@ -124,7 +125,7 @@ namespace SnatchingBracken.Patches
 
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
         {
-            mls.LogInfo("Killing player.");
+            mls.LogInfo("Bracken found good spot to kill, killing player.");
             __instance.inSpecialAnimationWithPlayer = playerControllerB;
             playerControllerB.inSpecialInteractAnimation = true;
             __instance.KillPlayerAnimationClientRpc(playerId);

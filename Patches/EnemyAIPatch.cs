@@ -9,7 +9,7 @@ namespace SnatchingBracken.Patches
     [HarmonyPatch(typeof(EnemyAI))]
     internal class EnemyAIPatch
     {
-        private const string modGUID = "Ovchinikov.SnatchingBracken";
+        private const string modGUID = "Ovchinikov.SnatchinBracken";
         private static ManualLogSource mls;
 
         static EnemyAIPatch()
@@ -39,10 +39,7 @@ namespace SnatchingBracken.Patches
         static void UpdatePosition(FlowermanAI __instance, PlayerControllerB player)
         {
             player.transform.position = __instance.transform.position;
-            mls.LogInfo("Placing in new position");
-            mls.LogInfo("FlowermanAI carrying body: " + __instance.carryingPlayerBody);
             float distance = Vector3.Distance(__instance.transform.position, __instance.favoriteSpot.position);
-            mls.LogInfo("Current distance from favorite place: " + distance);
         }
     }
 }
