@@ -31,6 +31,8 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(SnatchinBrackenBase));
             harmony.PatchAll(typeof(BrackenAIPatch));
             harmony.PatchAll(typeof(EnemyAIPatch));
+
+            mls.LogInfo("Finished Enabling Snatching Bracken");
         }
     }
 }

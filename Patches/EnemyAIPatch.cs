@@ -10,9 +10,9 @@ namespace SnatchinBracken.Patches
     internal class EnemyAIPatch
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken";
-        private static ManualLogSource mls;
 
-        private static float maxWait = 15000L;
+        private static readonly ManualLogSource mls;
+        private static readonly float maxWait = 15000L;
 
         static EnemyAIPatch()
         {

@@ -65,6 +65,7 @@ namespace SnatchinBracken.Patches
             {
                 ManuallyDropPlayerOnHit(__instance, playerWhoHit);
                 SharedData.Instance.BindedDrags.Remove(__instance);
+                SharedData.Instance.LastGrabbedTimeStamp.Remove(__instance);
             }
         }
 
