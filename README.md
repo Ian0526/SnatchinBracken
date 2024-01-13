@@ -1,2 +1,2 @@
 # SnatchinBracken
-The Bracken no longer kills on grab, instead it takes the player to its favorite spot first. This gives an opportunity for teammates to save  them.
+Brackens no longer necksnap on collision, instead it captures you and drags you into its "favorite spot." Teammates are given an opportunity to strike to release their teammate.
