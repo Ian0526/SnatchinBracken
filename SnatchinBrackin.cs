@@ -15,7 +15,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchingBracken.Main";
         private const string modName = "SnatchingBracken";
-        private const string modVersion = "1.0.1";
+        private const string modVersion = "1.0.2";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
@@ -39,6 +39,8 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(BrackenAIPatch));
             harmony.PatchAll(typeof(EnemyAIPatch));
             harmony.PatchAll(typeof(TeleporterPatch));
+            harmony.PatchAll(typeof(TurretPatch));
+            harmony.PatchAll(typeof(LandminePatch));
 
             mls.LogInfo("Finished Enabling SnatchinBracken");
         }
@@ -46,15 +48,36 @@ namespace SnatchinBracken
         private void InitializeConfigValues()
         {
             mls.LogInfo("Parsing SnatchinBracken config");
-            // Should players drop items on grab
             LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before per");
+
+            // Should players drop items on grab
             ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin) this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them.");
-            BoolCheckBoxConfigItem val = new BoolCheckBoxConfigItem(dropItemsOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)val);
+            BoolCheckBoxConfigItem dropItemsVal = new BoolCheckBoxConfigItem(dropItemsOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)dropItemsVal);
             SharedData.Instance.DropItems = dropItemsOption.Value;
             dropItemsOption.SettingChanged += delegate
             {
                 SharedData.Instance.DropItems = dropItemsOption.Value;
+            };
+
+            // Should players be ignored from Turrets
+            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on players if they're being pulled", true, "Should players be able to be targeted by turrets while being grabbed.");
+            BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)turretVal);
+            SharedData.Instance.IgnoreTurrets = turretOption.Value;
+            turretOption.SettingChanged += delegate
+            {
+                SharedData.Instance.IgnoreTurrets = turretOption.Value;
+            };
+
+            // Should players ignore Landmines
+            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines when players are being dragged", true, "Should players be able to active Landmines while being dragged.");
+            BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)mineVal);
+            SharedData.Instance.IgnoreMines = mineOption.Value;
+            mineOption.SettingChanged += delegate
+            {
+                SharedData.Instance.IgnoreMines = mineOption.Value;
             };
 
             // Slider for seconds until Bracken automatically kills when grabbed
