@@ -16,7 +16,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchingBracken.Main";
         private const string modName = "SnatchingBracken";
-        private const string modVersion = "1.0.2";
+        private const string modVersion = "1.1.2";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 

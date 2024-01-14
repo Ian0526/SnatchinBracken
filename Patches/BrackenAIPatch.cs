@@ -149,7 +149,7 @@ namespace SnatchinBracken.Patches
         // a double handed item.
         static void DropDoubleHandedItem(PlayerControllerB player, bool itemsFall = true, bool disconnecting = false)
         {
-            if (HUDManager.Instance.holdingTwoHandedItem && player.IsOwner)
+            if (HUDManager.Instance.holdingTwoHandedItem)
             {
                 player.DiscardHeldObject();
             }

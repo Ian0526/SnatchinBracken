@@ -74,7 +74,6 @@ namespace SnatchingBracken.Patches.test
             return null;
         }
 
-        // Not sure why instances are differing here, but this is needed
         private static PlayerControllerB SearchForCorrelatedPlayerObject(FlowermanAI flowerman)
         {
             if (SharedData.Instance.BindedDrags.ContainsKey(flowerman))

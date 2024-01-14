@@ -4,6 +4,10 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+
+### 1.1.2
+- [Bug Fix] Remove isOwner check from testing.
+
 ### 1.1.1
 - [Bug Fix] Minor adjustments from 1.1.0.
 
