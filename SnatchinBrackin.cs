@@ -61,7 +61,7 @@ namespace SnatchinBracken
             };
 
             // Should players be ignored from Turrets
-            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on Snatch", true, "Should players be able to be targeted by turrets while being dragged.");
+            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Turrets on Snatch", true, "Should players be able to be targeted by turrets while being dragged.");
             BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem) turretVal);
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
@@ -71,7 +71,7 @@ namespace SnatchinBracken
             };
 
             // Should players ignore Landmines
-            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines on Snatch", true, "Should players ignore Landmines while being dragged.");
+            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Mines on Snatch", true, "Should players ignore Landmines while being dragged.");
             BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)mineVal);
             SharedData.Instance.IgnoreMines = mineOption.Value;
