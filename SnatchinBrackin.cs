@@ -39,6 +39,7 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(BrackenAIPatch));
             harmony.PatchAll(typeof(EnemyAIPatch));
             harmony.PatchAll(typeof(TeleporterPatch));
+            harmony.PatchAll(typeof(LandminePatch));
             harmony.PatchAll(typeof(TurretPatch));
 
             mls.LogInfo("Finished Enabling SnatchinBracken");
@@ -70,7 +71,7 @@ namespace SnatchinBracken
             };
 
             // Should players ignore Landmines
-            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines on Snatch", true, "Should players be able to active Landmines while being dragged.");
+            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines on Snatch", true, "Should players ignore Landmines while being dragged.");
             BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)mineVal);
             SharedData.Instance.IgnoreMines = mineOption.Value;

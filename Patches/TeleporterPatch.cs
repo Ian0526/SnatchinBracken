@@ -35,10 +35,6 @@ namespace SnatchinBracken.Patches
                 {
                     ManuallyUnbindPlayer(flowerman, __instance);
                 }
-                else
-                {
-                    mls.LogError("FlowermanAI not found for the player.");
-                }
             }
             return true;
         }

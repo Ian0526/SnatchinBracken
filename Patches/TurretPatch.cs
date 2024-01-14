@@ -17,24 +17,15 @@ namespace SnatchinBracken.Patches
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
         }
 
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         [HarmonyPatch("CheckForPlayersInLineOfSight")]
-        static bool PrefixCheckForPlayersInLineOfSight(Turret __instance, ref PlayerControllerB __result, float radius = 2f, bool angleRangeCheck = false)
+        static void PostfixCheckForPlayersInLineOfSight(Turret __instance, ref PlayerControllerB __result, float radius, bool angleRangeCheck)
         {
-            if (!SharedData.Instance.IgnoreTurrets) { return true; }
-
-            PlayerControllerB foundPlayer = __instance.CheckForPlayersInLineOfSight(radius, angleRangeCheck);
-            if (foundPlayer != null && !SharedData.Instance.BindedDrags.ContainsValue(foundPlayer))
+            if (SharedData.Instance.IgnoreTurrets && __result != null && SharedData.Instance.BindedDrags.ContainsValue(__result))
             {
-                __result = foundPlayer;
-                return true;
+                mls.LogInfo("Ignoring player targeted by Turret due to being dragged.");
+                __result = null; // Ignore this player
             }
-            else
-            {
-                mls.LogInfo("Player would've been targeted by Turret, ignoring.");
-                __result = null;
-            }
-            return false;
         }
     }
 
