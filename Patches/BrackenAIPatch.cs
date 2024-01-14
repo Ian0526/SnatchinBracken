@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
+using System;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -35,11 +36,21 @@ namespace SnatchinBracken.Patches
                 return true; 
             }
 
+            // Should drop all items
+            if (SharedData.Instance.DropItems)
+            {
+                player.DropAllHeldItems();
+            } 
+            else 
+            {
+                // Check if player is holding a double item, force them to drop that if the config is false
+                DropDoubleHandedItem(player);
+            }
+
             __instance.creatureAnimator.SetBool("killing", value: false);
             __instance.creatureAnimator.SetBool("carryingBody", value: true);
             __instance.carryingPlayerBody = true;
             player.inSpecialInteractAnimation = true;
-            player.DropAllHeldItems();
             __instance.inKillAnimation = false;
             __instance.targetPlayer = null;
 
@@ -120,6 +131,16 @@ namespace SnatchinBracken.Patches
             __instance.inSpecialAnimationWithPlayer = playerControllerB;
             playerControllerB.inSpecialInteractAnimation = true;
             __instance.KillPlayerAnimationClientRpc(playerId);
+        }
+
+        // Will run regardless of Config option, player can't be grabbed (in special animation) while holding
+        // a double handed item.
+        static void DropDoubleHandedItem(PlayerControllerB player, bool itemsFall = true, bool disconnecting = false)
+        {
+            if (HUDManager.Instance.holdingTwoHandedItem && player.IsOwner)
+            {
+                player.DiscardHeldObject();
+            }
         }
     }
 }

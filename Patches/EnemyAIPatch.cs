@@ -12,7 +12,6 @@ namespace SnatchinBracken.Patches
         private const string modGUID = "Ovchinikov.SnatchinBracken";
 
         private static readonly ManualLogSource mls;
-        private static readonly float maxWait = 15000L;
 
         static EnemyAIPatch()
         {
@@ -32,7 +31,7 @@ namespace SnatchinBracken.Patches
             UpdatePosition(flowermanAI, player);
             float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
 
-            if (Time.time - lastGrabbed >= maxWait)
+            if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime * 1000))
             {
                 FinishKillAnimationNormally(flowermanAI, player, id);
             }
