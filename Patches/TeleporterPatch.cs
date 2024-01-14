@@ -22,12 +22,22 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("TeleportPlayer")]
         static bool PrefixTeleportPlayer(PlayerControllerB __instance, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
         {
+            if (__instance == null)
+            {
+                mls.LogError("PlayerControllerB instance is null.");
+                return true;
+            }
+
             if (SharedData.Instance.BindedDrags.ContainsValue(__instance))
             {
                 FlowermanAI flowerman = SearchForCorrelatedFlowerman(__instance);
                 if (flowerman != null)
                 {
                     ManuallyUnbindPlayer(flowerman, __instance);
+                }
+                else
+                {
+                    mls.LogError("FlowermanAI not found for the player.");
                 }
             }
             return true;

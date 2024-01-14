@@ -40,7 +40,6 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(EnemyAIPatch));
             harmony.PatchAll(typeof(TeleporterPatch));
             harmony.PatchAll(typeof(TurretPatch));
-            harmony.PatchAll(typeof(LandminePatch));
 
             mls.LogInfo("Finished Enabling SnatchinBracken");
         }
@@ -48,7 +47,7 @@ namespace SnatchinBracken
         private void InitializeConfigValues()
         {
             mls.LogInfo("Parsing SnatchinBracken config");
-            LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before per");
+            LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill.");
 
             // Should players drop items on grab
             ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin) this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them.");
@@ -61,7 +60,7 @@ namespace SnatchinBracken
             };
 
             // Should players be ignored from Turrets
-            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on players if they are being pulled", true, "Should players be able to be targeted by turrets while being grabbed.");
+            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on Snatch", true, "Should players be able to be targeted by turrets while being dragged.");
             BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem) turretVal);
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
@@ -71,7 +70,7 @@ namespace SnatchinBracken
             };
 
             // Should players ignore Landmines
-            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines when players are being dragged", true, "Should players be able to active Landmines while being dragged.");
+            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines on Snatch", true, "Should players be able to active Landmines while being dragged.");
             BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)mineVal);
             SharedData.Instance.IgnoreMines = mineOption.Value;

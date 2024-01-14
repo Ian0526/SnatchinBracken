@@ -20,7 +20,7 @@ namespace SnatchinBracken.Patches
 
         [HarmonyPrefix]
         [HarmonyPatch("OnTriggerEnter")]
-        static bool PrefixTriggerEntry(Turret __instance, Collider other)
+        static bool PrefixTriggerEntry(Landmine __instance, Collider other)
         {
             if (!SharedData.Instance.IgnoreMines) { return true; }
 
