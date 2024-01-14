@@ -4,6 +4,16 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.1.1
+- [Bug Fix] Minor adjustments from 1.1.0.
+
+### 1.1.0
+- [Feature] Added turret ignoring as a config option.
+- [Feature] Added landmine ignoring as a config option.
+- [Feature] Added time before next attack after interrupted as a config option.
+- [(Potentially Done? Needs testing) Feature] Added teleport support to properly dismount player.
+- [Bug Fix] Fixed Bracken becoming unable to attack after grabbing someone.
+
 ### 1.0.1
 - [Feature] LethalConfig dependency added.
 - [Feature] Can now change config options to drop items on grab & time until kill.
