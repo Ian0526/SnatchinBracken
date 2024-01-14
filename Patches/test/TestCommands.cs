@@ -3,10 +3,6 @@ using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SnatchingBracken.Patches.test
@@ -26,7 +22,7 @@ namespace SnatchingBracken.Patches.test
 
         [HarmonyPatch(typeof(HUDManager), "SubmitChat_performed")]
         [HarmonyPrefix]
-        private static void GameMasterCommands(HUDManager __instance)
+        private static void TestDroppingCommand(HUDManager __instance)
         {
             if (!__instance.IsHost) { return; }
             string text = __instance.chatTextField.text;
@@ -44,14 +40,15 @@ namespace SnatchingBracken.Patches.test
             {
                 case "!hit":
                 {
+                        // not sure why switch case's contents are tabbed extra but alright
                         FlowermanAI flowerman = SearchForCorrelatedFlowerman(hostRef);
                         if (flowerman == null)
                         {
                             mls.LogInfo("Flowerman or PlayerControllerB is null");
                             return;
                         }
-                    ManuallyUnbindPlayer(flowerman, hostRef);
-                    break;
+                        ManuallyUnbindPlayer(flowerman, hostRef);
+                        break;
                 }
             }
         }
