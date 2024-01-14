@@ -22,7 +22,6 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("KillPlayerAnimationServerRpc")]
         static bool PrefixKillPlayerAnimationServerRpc(FlowermanAI __instance, int playerObjectId)
         {
-            mls.LogInfo("Definitely running here x2.");
             if (__instance == null)
             {
                 mls.LogError("FlowermanAI instance is null.");
