@@ -1,2 +1,23 @@
 # SnatchinBracken
+
 SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly killing players on contact, Brackens now capture and drag players to a designated "favorite spot." This change allows teammates a chance to intervene and rescue the captured player.
+
+## Changelog
+
+### 1.0.1
+- [Feature] LethalConfig dependency added.
+- [Feature] Can now change config options to drop items on grab & time until kill.
+- [Bug Fix] Double handed objects will always drop so players can actually be killed.
+
+### 1.0.0
+- Initial release of SnatchinBracken.
+- Basic functionality of altering Bracken behavior implemented.
+
+## Dependencies
+- LethalConfig
+
+## Usage
+Open the settings menu with ESC and edit it through the Mod Config button.
+
+## Contributing
+Feel free to contribute. If it improves the system, I'm more than happy to implement your changes.
