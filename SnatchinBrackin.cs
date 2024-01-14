@@ -53,7 +53,7 @@ namespace SnatchinBracken
             // Should players drop items on grab
             ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin) this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them.");
             BoolCheckBoxConfigItem dropItemsVal = new BoolCheckBoxConfigItem(dropItemsOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)dropItemsVal);
+            LethalConfigManager.AddConfigItem((BaseConfigItem) dropItemsVal);
             SharedData.Instance.DropItems = dropItemsOption.Value;
             dropItemsOption.SettingChanged += delegate
             {
@@ -63,7 +63,7 @@ namespace SnatchinBracken
             // Should players be ignored from Turrets
             ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on players if they are being pulled", true, "Should players be able to be targeted by turrets while being grabbed.");
             BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)turretVal);
+            LethalConfigManager.AddConfigItem((BaseConfigItem) turretVal);
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
             turretOption.SettingChanged += delegate
             {
@@ -73,7 +73,7 @@ namespace SnatchinBracken
             // Should players ignore Landmines
             ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore mines when players are being dragged", true, "Should players be able to active Landmines while being dragged.");
             BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)(object)mineVal);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)mineVal);
             SharedData.Instance.IgnoreMines = mineOption.Value;
             mineOption.SettingChanged += delegate
             {
@@ -89,7 +89,7 @@ namespace SnatchinBracken
                 Max = 60
             };
             IntSliderConfigItem brackenKillTimeSlider = new IntSliderConfigItem(brackenKillTimeEntry, brackenKillTimeOptions);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) (object) brackenKillTimeSlider);
+            LethalConfigManager.AddConfigItem((BaseConfigItem) brackenKillTimeSlider);
             SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
             brackenKillTimeEntry.SettingChanged += delegate
             {

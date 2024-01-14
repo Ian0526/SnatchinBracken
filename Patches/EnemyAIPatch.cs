@@ -31,8 +31,11 @@ namespace SnatchinBracken.Patches
             UpdatePosition(flowermanAI, player);
             float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
 
-            if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime * 1000))
+            mls.LogInfo("Current time elapsed: " + (Time.time - lastGrabbed));
+            mls.LogInfo("Max time is " + SharedData.Instance.KillAtTime);
+            if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime))
             {
+                UnbindPlayerAndBracken(player, flowermanAI);
                 FinishKillAnimationNormally(flowermanAI, player, id);
             }
         }
@@ -47,6 +50,21 @@ namespace SnatchinBracken.Patches
         static void UpdatePosition(FlowermanAI __instance, PlayerControllerB player)
         {
             player.transform.position = __instance.transform.position;
+        }
+
+        static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)
+        {
+            player.inSpecialInteractAnimation = false;
+            __instance.carryingPlayerBody = false;
+            __instance.creatureAnimator.SetBool("killing", value: false);
+            __instance.creatureAnimator.SetBool("carryingBody", value: false);
+            RemoveDictionaryReferences(__instance);
+        }
+
+        static void RemoveDictionaryReferences(FlowermanAI __instance)
+        {
+            SharedData.Instance.BindedDrags.Remove(__instance);
+            SharedData.Instance.LastGrabbedTimeStamp.Remove(__instance);
         }
 
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
