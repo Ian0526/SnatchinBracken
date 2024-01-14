@@ -61,7 +61,7 @@ namespace SnatchinBracken
             };
 
             // Should players be ignored from Turrets
-            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on players if they're being pulled", true, "Should players be able to be targeted by turrets while being grabbed.");
+            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore turrets on players if they are being pulled", true, "Should players be able to be targeted by turrets while being grabbed.");
             BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)(object)turretVal);
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
