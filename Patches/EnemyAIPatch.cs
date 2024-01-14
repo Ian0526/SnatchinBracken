@@ -9,7 +9,7 @@ namespace SnatchinBracken.Patches
     [HarmonyPatch(typeof(EnemyAI))]
     internal class EnemyAIPatch
     {
-        private const string modGUID = "Ovchinikov.SnatchinBracken";
+        private const string modGUID = "Ovchinikov.SnatchinBracken.EnemyAI";
 
         private static readonly ManualLogSource mls;
 

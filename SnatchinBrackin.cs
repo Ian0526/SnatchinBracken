@@ -13,9 +13,9 @@ namespace SnatchinBracken
     [BepInPlugin(modGUID, modName, modVersion)]
     public class SnatchinBrackenBase : BaseUnityPlugin
     {
-        private const string modGUID = "Ovchinikov.SnatchingBracken";
+        private const string modGUID = "Ovchinikov.SnatchingBracken.Main";
         private const string modName = "SnatchingBracken";
-        private const string modVersion = "1.1.0";
+        private const string modVersion = "1.0.1";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
@@ -38,6 +38,7 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(SnatchinBrackenBase));
             harmony.PatchAll(typeof(BrackenAIPatch));
             harmony.PatchAll(typeof(EnemyAIPatch));
+            harmony.PatchAll(typeof(TeleporterPatch));
 
             mls.LogInfo("Finished Enabling SnatchinBracken");
         }

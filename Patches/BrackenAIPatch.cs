@@ -2,7 +2,6 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
-using System;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -10,7 +9,7 @@ namespace SnatchinBracken.Patches
     [HarmonyPatch(typeof(FlowermanAI))]
     internal class BrackenAIPatch
     {
-        private const string modGUID = "Ovchinikov.SnatchinBracken";
+        private const string modGUID = "Ovchinikov.SnatchinBracken.FlowermanAI";
 
         private static ManualLogSource mls;
 
