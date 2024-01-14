@@ -22,6 +22,7 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("KillPlayerAnimationServerRpc")]
         static bool PrefixKillPlayerAnimationServerRpc(FlowermanAI __instance, int playerObjectId)
         {
+            mls.LogInfo("Definitely running here x2.");
             if (__instance == null)
             {
                 mls.LogError("FlowermanAI instance is null.");
@@ -35,12 +36,20 @@ namespace SnatchinBracken.Patches
                 return true; 
             }
 
+            if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(__instance))
+            {
+                if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[__instance] <= SharedData.Instance.SecondsBeforeNextAttempt)
+                {
+                    return false;
+                }
+            }
+
             // Should drop all items
             if (SharedData.Instance.DropItems)
             {
                 player.DropAllHeldItems();
-            } 
-            else 
+            }
+            else
             {
                 // Check if player is holding a double item, force them to drop that if the config is false
                 DropDoubleHandedItem(player);
@@ -55,6 +64,7 @@ namespace SnatchinBracken.Patches
 
             SharedData.Instance.BindedDrags[__instance] = player;
             SharedData.Instance.PlayerIDs[player] = playerObjectId;
+            SharedData.Instance.IDsToPlayerController[playerObjectId] = player;
             SharedData.Instance.LastGrabbedTimeStamp[__instance] = Time.time;
 
             Transform transform = __instance.ChooseFarthestNodeFromPosition(RoundManager.FindMainEntrancePosition());
@@ -86,6 +96,9 @@ namespace SnatchinBracken.Patches
             __instance.carryingPlayerBody = false;
             __instance.creatureAnimator.SetBool("killing", value: false);
             __instance.creatureAnimator.SetBool("carryingBody", value: false);
+
+            // do other stuff zeekers does when they finish the kill
+            __instance.FinishKillAnimation(false);
         }
 
         [HarmonyPrefix]
@@ -116,7 +129,7 @@ namespace SnatchinBracken.Patches
 
             player.inSpecialInteractAnimation = false;
             SharedData.Instance.BindedDrags.Remove(__instance);
-            SharedData.Instance.LastGrabbedTimeStamp.Remove(__instance);
+            SharedData.Instance.LastGrabbedTimeStamp[__instance] = Time.time;
             __instance.carryingPlayerBody = false;
             __instance.bodyBeingCarried = null;
             __instance.creatureAnimator.SetBool("carryingBody", value: false);

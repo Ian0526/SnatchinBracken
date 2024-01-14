@@ -23,7 +23,6 @@ namespace SnatchinBracken.Patches
         static bool PrefixTriggerEntry(Landmine __instance, Collider other)
         {
             if (!SharedData.Instance.IgnoreMines) { return true; }
-            mls.LogInfo($"Running on enter trigger check for object: {other.gameObject.name}, tag: {other.tag}");
 
             // Check if the collider is a Bracken and is carrying a body
             FlowermanAI flowermanAI = other.gameObject.GetComponentInParent<FlowermanAI>();
@@ -41,7 +40,6 @@ namespace SnatchinBracken.Patches
                 return false;
             }
 
-            mls.LogInfo($"Mine triggered by object: {other.gameObject.name}, allowing explosion.");
             return true;
         }
 
@@ -50,7 +48,6 @@ namespace SnatchinBracken.Patches
         static bool PostfixTriggerExit(Landmine __instance, Collider other)
         {
             if (!SharedData.Instance.IgnoreMines) { return true; }
-            mls.LogInfo($"Running on enter trigger check for object: {other.gameObject.name}, tag: {other.tag}");
 
             // Check if the collider is a Bracken and is carrying a body
             FlowermanAI flowermanAI = other.gameObject.GetComponentInParent<FlowermanAI>();
@@ -67,16 +64,6 @@ namespace SnatchinBracken.Patches
                 mls.LogInfo("Player being dragged would've triggered Mine here, preventing.");
                 return false;
             }
-
-            mls.LogInfo($"Mine exit trigger by object: {other.gameObject.name}, allowing explosion.");
-            return true;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch("Detonate")]
-        static bool PostfixDetonate(Landmine __instance)
-        {
-            mls.LogInfo("Last exit was cause.");
             return true;
         }
     }

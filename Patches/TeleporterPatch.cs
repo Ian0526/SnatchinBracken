@@ -24,7 +24,6 @@ namespace SnatchinBracken.Patches
         {
             if (__instance == null)
             {
-                mls.LogError("PlayerControllerB instance is null.");
                 return true;
             }
 
@@ -43,7 +42,7 @@ namespace SnatchinBracken.Patches
         {
             foreach (var entry in SharedData.Instance.BindedDrags)
             {
-                if (entry.Value == player)
+                if (entry.Value.actualClientId == player.actualClientId)
                 {
                     return entry.Key;
                 }
@@ -53,14 +52,20 @@ namespace SnatchinBracken.Patches
 
         private static void ManuallyUnbindPlayer(FlowermanAI flowerman, PlayerControllerB player)
         {
+            SharedData.Instance.BindedDrags.Remove(flowerman);
+            SharedData.Instance.LastGrabbedTimeStamp[flowerman] = Time.time;
+
+            int playerId = SharedData.Instance.PlayerIDs.GetValueSafe(player);
             player.inSpecialInteractAnimation = false;
 
             flowerman.carryingPlayerBody = false;
             flowerman.creatureAnimator.SetBool("killing", value: false);
             flowerman.creatureAnimator.SetBool("carryingBody", value: false);
-
-            SharedData.Instance.BindedDrags.Remove(flowerman);
-            SharedData.Instance.LastGrabbedTimeStamp.Remove(flowerman);
+            flowerman.inSpecialAnimation = false;
+            flowerman.inKillAnimation = false;
+            flowerman.FinishKillAnimation(false);
+            flowerman.SwitchToBehaviourState(2);
+            flowerman.CancelKillAnimationClientRpc(playerId);
         }
     }
 

@@ -7,6 +7,7 @@ using LethalConfig;
 using LethalConfig.ConfigItems;
 using LethalConfig.ConfigItems.Options;
 using SnatchinBracken.Patches.data;
+using SnatchingBracken.Patches.test;
 
 namespace SnatchinBracken
 {
@@ -41,6 +42,7 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(TeleporterPatch));
             harmony.PatchAll(typeof(LandminePatch));
             harmony.PatchAll(typeof(TurretPatch));
+            harmony.PatchAll(typeof(TestCommands));
 
             mls.LogInfo("Finished Enabling SnatchinBracken");
         }
@@ -94,6 +96,22 @@ namespace SnatchinBracken
             brackenKillTimeEntry.SettingChanged += delegate
             {
                 SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
+            };
+
+            // Slider for seconds until Bracken automatically kills when grabbed
+            ConfigEntry<int> brackenNextAttemptEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Seconds Until Next Attempt", 5, "Time in seconds until Bracken is allowed to take another victim.");
+            IntSliderOptions brackenNextAttemptOptions = new IntSliderOptions
+            {
+                RequiresRestart = false,
+                Min = 1,
+                Max = 60
+            };
+            IntSliderConfigItem brackenNextAttemptySlider = new IntSliderConfigItem(brackenNextAttemptEntry, brackenNextAttemptOptions);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)brackenNextAttemptySlider);
+            SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
+            brackenNextAttemptEntry.SettingChanged += delegate
+            {
+                SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
             };
 
             mls.LogInfo("Config finished parsing");

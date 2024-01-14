@@ -31,13 +31,27 @@ namespace SnatchinBracken.Patches
             UpdatePosition(flowermanAI, player);
             float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
 
-            mls.LogInfo("Current time elapsed: " + (Time.time - lastGrabbed));
-            mls.LogInfo("Max time is " + SharedData.Instance.KillAtTime);
             if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime))
             {
                 UnbindPlayerAndBracken(player, flowermanAI);
                 FinishKillAnimationNormally(flowermanAI, player, id);
             }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("MeetsStandardPlayerCollisionConditions")]
+        static bool OverrideCollisionCheck(EnemyAI __instance, Collider other, bool inKillAnimation = false, bool overrideIsInsideFactoryCheck = false)
+        {
+            if (!(__instance is FlowermanAI flowerman)) return true;
+            if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowerman))
+            {
+                if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowerman] <= SharedData.Instance.SecondsBeforeNextAttempt)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         [HarmonyPrefix]
@@ -64,7 +78,7 @@ namespace SnatchinBracken.Patches
         static void RemoveDictionaryReferences(FlowermanAI __instance)
         {
             SharedData.Instance.BindedDrags.Remove(__instance);
-            SharedData.Instance.LastGrabbedTimeStamp.Remove(__instance);
+            SharedData.Instance.LastGrabbedTimeStamp[__instance] = Time.time;
         }
 
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
