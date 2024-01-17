@@ -7,7 +7,8 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 ### 1.2.0
 - [Overhaul] Implement proper networking, allow host to dictate procedures instead of duplicates with clients.
 - [Bug Fix] Properly allow for re-attacks
-- [Bug Fix] Drop items are now sync'd
+- [Bug Fix] Dropped items are now sync'd
+- [Feature] Tons of logic adjustment to make transitions more seamless, no animation in place yet though.
 
 ### 1.1.3
 - [QOL] Remove log.
