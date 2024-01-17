@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
+using System.Linq;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -16,6 +17,17 @@ namespace SnatchinBracken.Patches
         static EnemyAIPatch()
         {
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("Start")]
+        static void FlowermanStart(EnemyAI __instance)
+        {
+            if (__instance is FlowermanAI flowermanAI)
+            {
+                SharedData.Instance.FlowermanIDs[__instance.NetworkObjectId] = flowermanAI;
+                mls.LogInfo("We've binded the ID " + flowermanAI.NetworkObjectId + " to flowerman object");
+            }
         }
 
         [HarmonyPrefix]
@@ -34,7 +46,7 @@ namespace SnatchinBracken.Patches
             if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime))
             {
                 UnbindPlayerAndBracken(player, flowermanAI);
-                FinishKillAnimationNormally(flowermanAI, player, id);
+                FinishKillAnimationNormally(flowermanAI, player, (int) id);
             }
         }
 
@@ -42,11 +54,14 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("MeetsStandardPlayerCollisionConditions")]
         static bool OverrideCollisionCheck(EnemyAI __instance, Collider other, bool inKillAnimation = false, bool overrideIsInsideFactoryCheck = false)
         {
+            if (!__instance.IsHost) return true;
             if (!(__instance is FlowermanAI flowerman)) return true;
             if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowerman))
             {
                 if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowerman] <= SharedData.Instance.SecondsBeforeNextAttempt)
                 {
+                    mls.LogInfo("times " + Time.time + " " + SharedData.Instance.LastGrabbedTimeStamp[flowerman] + " <= " + SharedData.Instance.SecondsBeforeNextAttempt);
+                    mls.LogInfo("Blocking collision");
                     return false;
                 }
             }
@@ -58,6 +73,18 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("PlayerIsTargetable")]
         static bool PlayerIsTargetablePatch(EnemyAI __instance, PlayerControllerB playerScript, bool cannotBeInShip = false)
         {
+            if (__instance is FlowermanAI flowermanAI)
+            {
+                if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowermanAI))
+                {
+                    if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowermanAI] <= SharedData.Instance.SecondsBeforeNextAttempt)
+                    {
+                        return false;
+                    }
+                }
+                return !SharedData.Instance.BindedDrags.ContainsKey(flowermanAI);
+
+            }
             return !SharedData.Instance.BindedDrags.ContainsValue(playerScript);
         }
 

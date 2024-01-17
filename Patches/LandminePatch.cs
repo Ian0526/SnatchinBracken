@@ -22,6 +22,7 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("OnTriggerEnter")]
         static bool PrefixTriggerEntry(Landmine __instance, Collider other)
         {
+            if (!__instance.IsHost) return true;
             if (!SharedData.Instance.IgnoreMines) { return true; }
 
             // Check if the collider is a Bracken and is carrying a body

@@ -7,20 +7,27 @@ using LethalConfig;
 using LethalConfig.ConfigItems;
 using LethalConfig.ConfigItems.Options;
 using SnatchinBracken.Patches.data;
-using SnatchingBracken.Patches.test;
+using RuntimeNetcodeRPCValidator;
+using SnatchingBracken.Patches.network;
+using System.Reflection;
+using UnityEngine;
+using GameNetcodeStuff;
 
 namespace SnatchinBracken
 {
     [BepInPlugin(modGUID, modName, modVersion)]
+    [BepInDependency("NicholaScott.BepInEx.RuntimeNetcodeRPCValidator", BepInDependency.DependencyFlags.HardDependency)]
     public class SnatchinBrackenBase : BaseUnityPlugin
     {
-        private const string modGUID = "Ovchinikov.SnatchingBracken.Main";
-        private const string modName = "SnatchingBracken";
+        private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
+        private const string modName = "SnatchinBracken";
         private const string modVersion = "1.1.3";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
         private static SnatchinBrackenBase instance;
+
+        private NetcodeValidator netcodeValidator;
 
         internal ManualLogSource mls;
 
@@ -29,6 +36,20 @@ namespace SnatchinBracken
             if (instance == null)
             {
                 instance = this;
+            }
+
+            var types = Assembly.GetExecutingAssembly().GetTypes();
+            foreach (var type in types)
+            {
+                var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                foreach (var method in methods)
+                {
+                    var attributes = method.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false);
+                    if (attributes.Length > 0)
+                    {
+                        method.Invoke(null, null);
+                    }
+                }
             }
 
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
@@ -42,7 +63,10 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(TeleporterPatch));
             harmony.PatchAll(typeof(LandminePatch));
             harmony.PatchAll(typeof(TurretPatch));
-            harmony.PatchAll(typeof(TestCommands));
+
+            netcodeValidator = new NetcodeValidator(modGUID);
+            netcodeValidator.PatchAll();
+            netcodeValidator.BindToPreExistingObjectByBehaviour<FlowermanBinding, PlayerControllerB>();
 
             mls.LogInfo("Finished Enabling SnatchinBracken");
         }

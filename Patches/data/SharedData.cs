@@ -9,7 +9,8 @@ namespace SnatchinBracken.Patches.data
         public static SharedData Instance => _instance ?? (_instance = new SharedData());
 
         // Bracken to Player
-        public Dictionary<FlowermanAI, PlayerControllerB> BindedDrags { get; } = new Dictionary<FlowermanAI, PlayerControllerB>(); 
+        public Dictionary<FlowermanAI, PlayerControllerB> BindedDrags { get; } = new Dictionary<FlowermanAI, PlayerControllerB>();
+        public Dictionary<ulong, FlowermanAI> FlowermanIDs { get; } = new Dictionary<ulong, FlowermanAI>();
         public Dictionary<PlayerControllerB, int> PlayerIDs { get; } = new Dictionary<PlayerControllerB, int>();
         public Dictionary<int, PlayerControllerB> IDsToPlayerController { get; } = new Dictionary<int, PlayerControllerB>();
         public Dictionary<FlowermanAI, float> LastGrabbedTimeStamp { get; } = new Dictionary<FlowermanAI, float>();

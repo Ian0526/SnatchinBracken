@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
+using SnatchingBracken.Patches.network;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -22,6 +23,7 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("TeleportPlayer")]
         static bool PrefixTeleportPlayer(PlayerControllerB __instance, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
         {
+            if (!__instance.IsHost && !__instance.IsServer) return true;
             if (__instance == null)
             {
                 return true;
@@ -52,10 +54,9 @@ namespace SnatchinBracken.Patches
 
         private static void ManuallyUnbindPlayer(FlowermanAI flowerman, PlayerControllerB player)
         {
-            SharedData.Instance.BindedDrags.Remove(flowerman);
-            SharedData.Instance.LastGrabbedTimeStamp[flowerman] = Time.time;
-
             int playerId = SharedData.Instance.PlayerIDs.GetValueSafe(player);
+            player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, flowerman.NetworkObjectId);
+
             player.inSpecialInteractAnimation = false;
 
             flowerman.carryingPlayerBody = false;
@@ -65,7 +66,7 @@ namespace SnatchinBracken.Patches
             flowerman.inKillAnimation = false;
             flowerman.FinishKillAnimation(false);
             flowerman.SwitchToBehaviourState(2);
-            flowerman.CancelKillAnimationClientRpc(playerId);
+            flowerman.CancelKillAnimationClientRpc((int) playerId);
         }
     }
 
