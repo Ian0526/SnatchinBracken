@@ -23,7 +23,6 @@ namespace SnatchinBracken.Patches
         {
             if (SharedData.Instance.IgnoreTurrets && __result != null && SharedData.Instance.BindedDrags.ContainsValue(__result))
             {
-                mls.LogInfo("Ignoring player targeted by Turret due to being dragged.");
                 __result = null;
             }
         }

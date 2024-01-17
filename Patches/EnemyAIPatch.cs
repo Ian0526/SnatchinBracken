@@ -26,7 +26,6 @@ namespace SnatchinBracken.Patches
             if (__instance is FlowermanAI flowermanAI)
             {
                 SharedData.Instance.FlowermanIDs[__instance.NetworkObjectId] = flowermanAI;
-                mls.LogInfo("We've binded the ID " + flowermanAI.NetworkObjectId + " to flowerman object");
             }
         }
 
@@ -60,8 +59,6 @@ namespace SnatchinBracken.Patches
             {
                 if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowerman] <= SharedData.Instance.SecondsBeforeNextAttempt)
                 {
-                    mls.LogInfo("times " + Time.time + " " + SharedData.Instance.LastGrabbedTimeStamp[flowerman] + " <= " + SharedData.Instance.SecondsBeforeNextAttempt);
-                    mls.LogInfo("Blocking collision");
                     return false;
                 }
             }
@@ -110,7 +107,6 @@ namespace SnatchinBracken.Patches
 
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
         {
-            mls.LogInfo("Bracken found good spot to kill, killing player.");
             __instance.inSpecialAnimationWithPlayer = playerControllerB;
             playerControllerB.inSpecialInteractAnimation = true;
             __instance.KillPlayerAnimationClientRpc(playerId);

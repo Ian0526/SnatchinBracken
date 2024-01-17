@@ -25,7 +25,6 @@ namespace SnatchinBracken.Patches
             if (!__instance.IsHost) return true;
             if (!SharedData.Instance.IgnoreMines) { return true; }
 
-            // Check if the collider is a Bracken and is carrying a body
             FlowermanAI flowermanAI = other.gameObject.GetComponentInParent<FlowermanAI>();
             if (flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
             {
@@ -33,7 +32,6 @@ namespace SnatchinBracken.Patches
                 return false;
             }
 
-            // Check if the collider is a player being dragged
             PlayerControllerB component = other.gameObject.GetComponent<PlayerControllerB>();
             if (component != null && SharedData.Instance.BindedDrags.ContainsValue(component) && !component.isPlayerDead)
             {
@@ -50,7 +48,6 @@ namespace SnatchinBracken.Patches
         {
             if (!SharedData.Instance.IgnoreMines) { return true; }
 
-            // Check if the collider is a Bracken and is carrying a body
             FlowermanAI flowermanAI = other.gameObject.GetComponentInParent<FlowermanAI>();
             if (flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
             {
@@ -58,7 +55,6 @@ namespace SnatchinBracken.Patches
                 return false;
             }
 
-            // Check if the collider is a player being dragged
             PlayerControllerB component = other.gameObject.GetComponent<PlayerControllerB>();
             if (component != null && SharedData.Instance.BindedDrags.ContainsValue(component) && !component.isPlayerDead)
             {

@@ -35,7 +35,6 @@ namespace SnatchinBracken.Patches
             {
                 return true;
             }
-            mls.LogInfo("Bracken identified playerObjectId " + playerObjectId);
 
             if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
@@ -93,18 +92,15 @@ namespace SnatchinBracken.Patches
         {
             if (!__instance.IsHost && !__instance.IsServer)
             {
-                mls.LogInfo("Not host, not running");
                 return;
             }
             if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
-                mls.LogInfo("Contained");
                 PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
                 int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
                 ManuallyDropPlayerOnHit(__instance, player);
                 player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
             }
-            mls.LogInfo("Finished hit");
         }
 
         private static void ManuallyDropPlayerOnHit(FlowermanAI __instance, PlayerControllerB player)
@@ -124,13 +120,11 @@ namespace SnatchinBracken.Patches
             if (!__instance.IsHost && !__instance.IsServer) return true;
             if (__instance == null)
             {
-                mls.LogInfo("FlowermanAI instance is null in DropBodyPatch.");
                 return true;
             }
 
             if (!SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
-                mls.LogInfo("FlowermanAI instance not found in BindedDrags map.");
                 return true;
             }
 
@@ -139,7 +133,6 @@ namespace SnatchinBracken.Patches
 
             if (player == null)
             {
-                mls.LogError("PlayerControllerB instance is null in BindedDrags map.");
                 SharedData.Instance.BindedDrags.Remove(__instance);
                 return true;
             }
