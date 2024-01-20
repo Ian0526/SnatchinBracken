@@ -21,7 +21,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.2.1";
+        private const string modVersion = "1.2.5";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
@@ -77,7 +77,7 @@ namespace SnatchinBracken
             LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill.");
 
             // Should players drop items on grab
-            ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin) this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them.");
+            ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin) this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them?");
             BoolCheckBoxConfigItem dropItemsVal = new BoolCheckBoxConfigItem(dropItemsOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem) dropItemsVal);
             SharedData.Instance.DropItems = dropItemsOption.Value;
@@ -87,7 +87,7 @@ namespace SnatchinBracken
             };
 
             // Should players be ignored from Turrets
-            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Turrets on Snatch", true, "Should players be able to be targeted by turrets while being dragged.");
+            ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Turrets on Snatch", true, "Should players be targetable when dragged?");
             BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem) turretVal);
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
@@ -96,8 +96,18 @@ namespace SnatchinBracken
                 SharedData.Instance.IgnoreTurrets = turretOption.Value;
             };
 
+            // Should Brackens behave more naturally, meaning faster, more chaotic deaths
+            ConfigEntry<bool> chaoticOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Brackens Behave More Naturally", false, "If enabled, Brackens will perform kills at unpredictable times after an initial drop. Otherwise, the Bracken either must be in distance of the favorite location, or hit the time limit.");
+            BoolCheckBoxConfigItem chaoticVal = new BoolCheckBoxConfigItem(chaoticOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)chaoticVal);
+            SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
+            chaoticOption.SettingChanged += delegate
+            {
+                SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
+            };
+
             // Should players ignore Landmines
-            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Mines on Snatch", true, "Should players ignore Landmines while being dragged.");
+            ConfigEntry<bool> mineOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Mines on Snatch", true, "Should players ignore Landmines while being dragged?");
             BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)mineVal);
             SharedData.Instance.IgnoreMines = mineOption.Value;
@@ -122,7 +132,7 @@ namespace SnatchinBracken
                 SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
             };
 
-            // Slider for seconds until Bracken automatically kills when grabbed
+            // Slider for seconds until Bracken can try to attack another person after dropping/being hit
             ConfigEntry<int> brackenNextAttemptEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Seconds Until Next Attempt", 5, "Time in seconds until Bracken is allowed to take another victim.");
             IntSliderOptions brackenNextAttemptOptions = new IntSliderOptions
             {
@@ -130,12 +140,38 @@ namespace SnatchinBracken
                 Min = 1,
                 Max = 60
             };
-            IntSliderConfigItem brackenNextAttemptySlider = new IntSliderConfigItem(brackenNextAttemptEntry, brackenNextAttemptOptions);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)brackenNextAttemptySlider);
+            IntSliderConfigItem brackenDistanceSlider = new IntSliderConfigItem(brackenNextAttemptEntry, brackenNextAttemptOptions);
+            LethalConfigManager.AddConfigItem((BaseConfigItem) brackenDistanceSlider);
             SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
             brackenNextAttemptEntry.SettingChanged += delegate
             {
                 SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
+            };
+
+            // Slider for seconds until Bracken can try to attack another person after dropping/being hit
+            ConfigEntry<int> distanceAutoKillerEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Distance For Kill", 5, "How far should the Bracken be from its favorite spot to initiate a kill?");
+            IntSliderOptions distanceAutoKillerOptions = new IntSliderOptions
+            {
+                RequiresRestart = false,
+                Min = 1,
+                Max = 60
+            };
+            IntSliderConfigItem distanceAutoKillerSlider = new IntSliderConfigItem(distanceAutoKillerEntry, distanceAutoKillerOptions);
+            LethalConfigManager.AddConfigItem((BaseConfigItem) distanceAutoKillerSlider);
+            SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
+            distanceAutoKillerEntry.SettingChanged += delegate
+            {
+                SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
+            };
+
+            // Should the Bracken instakill if the player is alone
+            ConfigEntry<bool> instaKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Instakill When Alone", true, "Should players be instantly killed if they're alone?");
+            BoolCheckBoxConfigItem instaKillVal = new BoolCheckBoxConfigItem (instaKillOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)instaKillVal);
+            SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
+            instaKillOption.SettingChanged += delegate
+            {
+                SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
             };
 
             mls.LogInfo("Config finished parsing");

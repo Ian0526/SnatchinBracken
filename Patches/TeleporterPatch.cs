@@ -34,8 +34,12 @@ namespace SnatchinBracken.Patches
                 FlowermanAI flowerman = SearchForCorrelatedFlowerman(__instance);
                 if (flowerman != null)
                 {
+                    int id = SharedData.Instance.PlayerIDs[__instance];
+                    SharedData.UpdateTimestampNow(flowerman);
                     flowerman.HitEnemy(1, __instance, false);
                     ManuallyUnbindPlayer(flowerman, __instance);
+                    __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowerman.NetworkObjectId);
+                    __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowerman.NetworkObjectId);
                 }
             }
             return true;
@@ -63,8 +67,10 @@ namespace SnatchinBracken.Patches
             flowerman.creatureAnimator.SetBool("killing", value: false);
             flowerman.creatureAnimator.SetBool("carryingBody", value: false);
             flowerman.FinishKillAnimation(false);
+            flowerman.stunnedByPlayer = null;
+            flowerman.stunNormalizedTimer = 0f;
+            flowerman.favoriteSpot = null;
 
-            player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, flowerman.NetworkObjectId);
         }
     }
 

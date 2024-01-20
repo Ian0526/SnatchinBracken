@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
+using SnatchingBracken.Patches.network;
 using System.Linq;
 using UnityEngine;
 
@@ -13,6 +14,11 @@ namespace SnatchinBracken.Patches
         private const string modGUID = "Ovchinikov.SnatchinBracken.EnemyAI";
 
         private static readonly ManualLogSource mls;
+
+        private static float distnaceThreshold = 0.1f;
+        private static float minForceMultiplier = 1f;
+        private static float maxForceMultiplier = 10f;
+        private static float maxDistance = 10f;
 
         static EnemyAIPatch()
         {
@@ -38,14 +44,33 @@ namespace SnatchinBracken.Patches
                 return;
             }
             PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(flowermanAI);
-            int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
-            UpdatePosition(flowermanAI, player);
-            float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
 
-            if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime))
+            if (player == null)
+            {
+                return;
+            }
+
+            if (player.isPlayerDead)
             {
                 UnbindPlayerAndBracken(player, flowermanAI);
-                FinishKillAnimationNormally(flowermanAI, player, (int) id);
+                return;
+            }
+
+            UpdatePosition(flowermanAI, player);
+
+            if (__instance.IsHost || __instance.IsServer)
+            {
+
+                int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
+                float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
+                float distance = Vector3.Distance(__instance.transform.position, __instance.favoriteSpot.position);
+
+                if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime) || (distance <= SharedData.Instance.DistanceFromFavorite))
+                {
+                    SharedData.UpdateTimestampNow(flowermanAI);
+                    UnbindPlayerAndBracken(player, flowermanAI);
+                    FinishKillAnimationNormally(flowermanAI, player, (int)id);
+                }
             }
         }
 
@@ -62,8 +87,15 @@ namespace SnatchinBracken.Patches
                     return false;
                 }
             }
-
             return true;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("TargetClosestPlayer")]
+        static bool ClosestPlayerPatch(FlowermanAI __instance)
+        {
+            if (!__instance.IsHost && !__instance.IsServer) return true;
+            return !SharedData.Instance.BindedDrags.ContainsKey(__instance);
         }
 
         [HarmonyPrefix]
@@ -92,17 +124,32 @@ namespace SnatchinBracken.Patches
 
         static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)
         {
+            if (!SharedData.Instance.PlayerIDs.ContainsKey(player))
+            {
+                mls.LogInfo("There isn't a player bound to this Bracken. That's strange.");
+                return;
+            }
+            int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
             player.inSpecialInteractAnimation = false;
-            __instance.carryingPlayerBody = false;
+            player.inAnimationWithEnemy = null;
+
+            __instance.carryingPlayerBody = true;
             __instance.creatureAnimator.SetBool("killing", value: false);
             __instance.creatureAnimator.SetBool("carryingBody", value: false);
-            RemoveDictionaryReferences(__instance);
+            __instance.stunnedByPlayer = null;
+            __instance.stunNormalizedTimer = 0f;
+            __instance.angerMeter = 0f;
+            __instance.isInAngerMode = false;
+            __instance.timesThreatened = 0;
+            __instance.FinishKillAnimation(false);
+
+            RemoveDictionaryReferences(__instance, player, id);
         }
 
-        static void RemoveDictionaryReferences(FlowermanAI __instance)
+        static void RemoveDictionaryReferences(FlowermanAI __instance, PlayerControllerB player, int playerId)
         {
-            SharedData.Instance.BindedDrags.Remove(__instance);
-            SharedData.Instance.LastGrabbedTimeStamp[__instance] = Time.time;
+            player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
+            player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
         }
 
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)

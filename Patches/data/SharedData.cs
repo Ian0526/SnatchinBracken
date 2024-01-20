@@ -1,5 +1,6 @@
 ﻿using GameNetcodeStuff;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace SnatchinBracken.Patches.data
 {
@@ -17,8 +18,16 @@ namespace SnatchinBracken.Patches.data
 
         public bool DropItems { get; set; }
         public bool IgnoreTurrets { get; set; }
+        public bool InstantKillIfAlone { get; set; }
         public bool IgnoreMines { get; set; }
+        public bool ChaoticTendencies { get; set; }
         public float KillAtTime { get; set; }
         public float SecondsBeforeNextAttempt { get; set; }
+        public float DistanceFromFavorite { get; set; }
+
+        public static void UpdateTimestampNow(FlowermanAI flowermanAI)
+        {
+            SharedData.Instance.LastGrabbedTimeStamp[flowermanAI] = Time.time;
+        }
     }
 }

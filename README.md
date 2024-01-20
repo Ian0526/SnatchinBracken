@@ -4,11 +4,26 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+
+### 1.2.5
+- [QOL] Removed Warn log
+
+### 1.2.4
+- [Bug Fix] Teleporters now work perfectly fine.
+- [Bug Fix] Fixed stranged de-sync'd behavior after attacks.
+- [Known Issue] After being striked, clients will see the Bracken desync for a moment, and vanish after a few moments. (I should have a fix out for this sometime in the next few days)
+
+### 1.2.1 - 1.2.3
+- [Bug Fix] Get furthest tile from where the player is grabbed at.
+- [Feature] Added config option to adjust the kill distance from the favorite spot.
+- [Feature] Added config option to immediately kill the final player.
+
 ### 1.2.0
-- [Overhaul] Implement proper networking, allow host to dictate procedures instead of duplicates with clients.
+- [Overhaul] Implemented proper networking, allow host to dictate procedures instead of duplicates with clients.
 - [Bug Fix] Properly allow for re-attacks
 - [Bug Fix] Dropped items are now sync'd
 - [Feature] Tons of logic adjustment to make transitions more seamless, no animation in place yet though.
+- [Known Issue] Teleporting will prevent the Bracken from attacking the same player again. Working on a fix.
 
 ### 1.1.3
 - [QOL] Remove log.

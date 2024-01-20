@@ -22,7 +22,7 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("OnTriggerEnter")]
         static bool PrefixTriggerEntry(Landmine __instance, Collider other)
         {
-            if (!__instance.IsHost) return true;
+            if (!__instance.IsHost && !__instance.IsServer) return true;
             if (!SharedData.Instance.IgnoreMines) { return true; }
 
             FlowermanAI flowermanAI = other.gameObject.GetComponentInParent<FlowermanAI>();

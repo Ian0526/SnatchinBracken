@@ -4,6 +4,7 @@ using HarmonyLib;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace SnatchinBracken.Patches
 {
@@ -14,6 +15,8 @@ namespace SnatchinBracken.Patches
 
         private static ManualLogSource mls;
 
+        private static List<FlowermanAI> JustProcessed = new List<FlowermanAI>();
+
         static BrackenAIPatch()
         {
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
@@ -23,14 +26,23 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("KillPlayerAnimationServerRpc")]
         static bool PrefixKillPlayerAnimationServerRpc(FlowermanAI __instance, int playerObjectId)
         {
-            if (!__instance.IsHost && !__instance.IsServer) return true;
+            if (!__instance.IsHost && !__instance.IsServer)
+            {
+                return true;
+            }
+
             if (__instance == null)
             {
-                mls.LogError("FlowermanAI instance is null.");
+                return true;
+            }
+
+            if (CountAlivePlayers() <= 1 && SharedData.Instance.InstantKillIfAlone)
+            {
                 return true;
             }
 
             PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerObjectId];
+
             if (player == null)
             {
                 return true;
@@ -63,20 +75,16 @@ namespace SnatchinBracken.Patches
                 DropDoubleHandedItem(player);
             }
 
-            __instance.creatureAnimator.SetBool("killing", value: false);
-            __instance.creatureAnimator.SetBool("carryingBody", value: true);
-            __instance.carryingPlayerBody = true;
-            player.inSpecialInteractAnimation = true;
-            __instance.inKillAnimation = false;
-            __instance.targetPlayer = null;
-
-            player.GetComponent<FlowermanBinding>().BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
-
-            Transform transform = __instance.ChooseFarthestNodeFromPosition(RoundManager.FindMainEntrancePosition());
-            if (__instance.favoriteSpot == null)
+            Rigidbody[] componentsInChildren = player.gameObject.GetComponentsInChildren<Rigidbody>();
+            for (int i = 0; i < componentsInChildren.Length; i++)
             {
-                __instance.favoriteSpot = transform;
+                componentsInChildren[i].isKinematic = false;
+                mls.LogInfo("The component's name is:" + componentsInChildren[i].name);
             }
+
+            player.GetComponent<FlowermanBinding>().PrepForBindingServerRpc(playerObjectId, __instance.NetworkObjectId);
+            player.GetComponent<FlowermanBinding>().BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
+            player.GetComponent<FlowermanBinding>().UpdateFavoriteSpotServerRpc(playerObjectId, __instance.NetworkObjectId);
 
             __instance.SwitchToBehaviourStateOnLocalClient(1);
             if (__instance.IsServer)
@@ -86,9 +94,27 @@ namespace SnatchinBracken.Patches
             return false;
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch("HitEnemy")]
+        static void HitEnemyPostPatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
+        {
+            if (!__instance.IsHost && !__instance.IsServer)
+            {
+                if (JustProcessed.Contains(__instance))
+                {
+                    __instance.angerMeter = 0;
+                    __instance.isInAngerMode = false;
+                    __instance.angerCheckInterval = 0;
+
+                    JustProcessed.Remove(__instance);
+                }
+                return;
+            }
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch("HitEnemy")]
-        static void HitEnemyPatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
+        static void HitEnemyPrePatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
         {
             if (!__instance.IsHost && !__instance.IsServer)
             {
@@ -98,17 +124,35 @@ namespace SnatchinBracken.Patches
             {
                 PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
                 int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
+                SharedData.UpdateTimestampNow(__instance);
                 ManuallyDropPlayerOnHit(__instance, player);
+
                 player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
+                player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
+                JustProcessed.Add(__instance);
             }
+        }
+
+
+        private static int CountAlivePlayers()
+        {
+            return StartOfRound.Instance.livingPlayers;
         }
 
         private static void ManuallyDropPlayerOnHit(FlowermanAI __instance, PlayerControllerB player)
         {
             player.inSpecialInteractAnimation = false;
+            player.inAnimationWithEnemy = null;
+
             __instance.carryingPlayerBody = false;
             __instance.creatureAnimator.SetBool("killing", value: false);
             __instance.creatureAnimator.SetBool("carryingBody", value: false);
+            __instance.angerMeter = 0f;
+            __instance.isInAngerMode = false;
+            __instance.stunnedByPlayer = null;
+            __instance.stunNormalizedTimer = 0f;
+            __instance.evadeStealthTimer = 0.1f;
+            __instance.timesThreatened = 0;
 
             __instance.FinishKillAnimation(false);
         }
@@ -118,14 +162,15 @@ namespace SnatchinBracken.Patches
         static bool DropBodyPatch(FlowermanAI __instance)
         {
             if (!__instance.IsHost && !__instance.IsServer) return true;
-            if (__instance == null)
-            {
-                return true;
-            }
 
             if (!SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
                 return true;
+            }
+
+            if (!SharedData.Instance.ChaoticTendencies && !PrerequisiteKilling(__instance))
+            {
+                return false;
             }
 
             PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
@@ -143,8 +188,25 @@ namespace SnatchinBracken.Patches
             __instance.carryingPlayerBody = false;
             __instance.bodyBeingCarried = null;
             __instance.creatureAnimator.SetBool("carryingBody", value: false);
+
             FinishKillAnimationNormally(__instance, player, (int) id);
 
+            return false;
+        }
+
+        static bool PrerequisiteKilling(FlowermanAI flowerman)
+        {
+            if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowerman))
+            {
+
+                float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowerman];
+                float distance = Vector3.Distance(flowerman.transform.position, flowerman.favoriteSpot.position);
+
+                if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime) || (distance <= SharedData.Instance.DistanceFromFavorite))
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
