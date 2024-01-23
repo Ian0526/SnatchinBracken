@@ -4,13 +4,22 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.2.7
+- [Feature] Config option to force the Bracken to make the famous "Bracken Room" its permanent favorite spot.
+
+### 1.2.6
+- [Feature] Gradual damage, similar to the snare flea (leech) & config options.
+- [Feature] Kill the Bracken if it gets stuck somewhere & config options (disabled by default with gradual damage).
+- [Bug Fix] Hitting players no longer does damage if they are being dragged.
+- [Known Issue] Players still experience brief desync after hitting the Bracken. It fixes itself a few seconds later.
+- [Known Issue] Brackens may choose a location that's behind a locked door. I've included a config option as stated above to automatically kill the player if the Bracken is stuck for more than 5 seconds.
 
 ### 1.2.5
 - [QOL] Removed Warn log
 
 ### 1.2.4
 - [Bug Fix] Teleporters now work perfectly fine.
-- [Bug Fix] Fixed stranged de-sync'd behavior after attacks.
+- [Bug Fix] Fixed strange desync behavior after attacks.
 - [Known Issue] After being striked, clients will see the Bracken desync for a moment, and vanish after a few moments. (I should have a fix out for this sometime in the next few days)
 
 ### 1.2.1 - 1.2.3

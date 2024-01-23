@@ -12,6 +12,9 @@ using SnatchingBracken.Patches.network;
 using System.Reflection;
 using UnityEngine;
 using GameNetcodeStuff;
+using SnatchingBracken;
+using SnatchingBracken.Patches.dungeon;
+using SnatchingBracken.Patches.ship;
 
 namespace SnatchinBracken
 {
@@ -21,7 +24,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.2.5";
+        private const string modVersion = "1.2.7";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
@@ -63,6 +66,9 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(TeleporterPatch));
             harmony.PatchAll(typeof(LandminePatch));
             harmony.PatchAll(typeof(TurretPatch));
+            harmony.PatchAll(typeof(PlayerPatch));
+            harmony.PatchAll(typeof(DungeonGenPatch));
+            harmony.PatchAll(typeof(ItemDropshipPatch));
 
             netcodeValidator = new NetcodeValidator(modGUID);
             netcodeValidator.PatchAll();
@@ -83,7 +89,10 @@ namespace SnatchinBracken
             SharedData.Instance.DropItems = dropItemsOption.Value;
             dropItemsOption.SettingChanged += delegate
             {
-                SharedData.Instance.DropItems = dropItemsOption.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.DropItems = dropItemsOption.Value;
+                }
             };
 
             // Should players be ignored from Turrets
@@ -93,7 +102,10 @@ namespace SnatchinBracken
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
             turretOption.SettingChanged += delegate
             {
-                SharedData.Instance.IgnoreTurrets = turretOption.Value;
+                if (HUDManager.Instance.IsHost ||  HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.IgnoreTurrets = turretOption.Value;
+                }
             };
 
             // Should Brackens behave more naturally, meaning faster, more chaotic deaths
@@ -103,7 +115,38 @@ namespace SnatchinBracken
             SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
             chaoticOption.SettingChanged += delegate
             {
-                SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
+                }
+            };
+
+            // Add a new configuration option for stuckForceKill
+            ConfigEntry<bool> stuckForceKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Stuck Force Kill", false, "If enabled, Brackens will force kill when stuck at the same spot for at least 5 seconds.");
+            BoolCheckBoxConfigItem stuckForceKillVal = new BoolCheckBoxConfigItem(stuckForceKillOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)stuckForceKillVal);
+            SharedData.Instance.StuckForceKill = stuckForceKillOption.Value;
+
+            // Handle the event when the setting is changed
+            stuckForceKillOption.SettingChanged += delegate
+            {
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.StuckForceKill = stuckForceKillOption.Value;
+                }
+            };
+
+            ConfigEntry<bool> brackenRoomOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Force Set Favorite Location To Bracken Room", false, "If enabled, Brackens' favorite locations will be set to the Bracken room. The room sometimes doesn't spawn, so please don't be alarmed if they don't take you there if this is enabled.");
+            BoolCheckBoxConfigItem brackenRoomVal = new BoolCheckBoxConfigItem(brackenRoomOption);
+            LethalConfigManager.AddConfigItem((BaseConfigItem) brackenRoomVal);
+            SharedData.Instance.BrackenRoom = brackenRoomOption.Value;
+
+            brackenRoomOption.SettingChanged += delegate
+            {
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.BrackenRoom = brackenRoomOption.Value;
+                }
             };
 
             // Should players ignore Landmines
@@ -113,7 +156,10 @@ namespace SnatchinBracken
             SharedData.Instance.IgnoreMines = mineOption.Value;
             mineOption.SettingChanged += delegate
             {
-                SharedData.Instance.IgnoreMines = mineOption.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.IgnoreMines = mineOption.Value;
+                }
             };
 
             // Slider for seconds until Bracken automatically kills when grabbed
@@ -129,7 +175,10 @@ namespace SnatchinBracken
             SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
             brackenKillTimeEntry.SettingChanged += delegate
             {
-                SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
+                }
             };
 
             // Slider for seconds until Bracken can try to attack another person after dropping/being hit
@@ -140,16 +189,51 @@ namespace SnatchinBracken
                 Min = 1,
                 Max = 60
             };
-            IntSliderConfigItem brackenDistanceSlider = new IntSliderConfigItem(brackenNextAttemptEntry, brackenNextAttemptOptions);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) brackenDistanceSlider);
+            IntSliderConfigItem brackenNextAttemptSlider = new IntSliderConfigItem(brackenNextAttemptEntry, brackenNextAttemptOptions);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)brackenNextAttemptSlider);
             SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
             brackenNextAttemptEntry.SettingChanged += delegate
             {
-                SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
+                }
+            };
+
+            // Should Brackens deal damage over time instead of abruptly killing them after they reach a spot?
+            ConfigEntry<bool> doDamageOnIntervalEntry = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Do Gradual Damage", false, "Should players be hurt gradually while being dragged?");
+            BoolCheckBoxConfigItem doDamageOnInterval = new BoolCheckBoxConfigItem(doDamageOnIntervalEntry);
+            LethalConfigManager.AddConfigItem(doDamageOnInterval);
+            SharedData.Instance.DoDamageOnInterval = doDamageOnIntervalEntry.Value;
+            doDamageOnIntervalEntry.SettingChanged += delegate
+            {
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.DoDamageOnInterval = doDamageOnIntervalEntry.Value;
+                }
+            };
+
+            // Time required for above entry
+            ConfigEntry<int> damageDealtProgressively = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Damage Dealt At Interval", 5, "This only applies if you have \"Do Gradual Damage\" enabled. While dragged, every second this configured amount of damage will be dealt to the player.");
+            IntSliderOptions damageDealtProgressivelyOptions = new IntSliderOptions
+            {
+                RequiresRestart = false,
+                Min = 1,
+                Max = 100
+            };
+            IntSliderConfigItem damageDealtProgressivelySlider = new IntSliderConfigItem(damageDealtProgressively, damageDealtProgressivelyOptions);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)damageDealtProgressivelySlider);
+            SharedData.Instance.DamageDealtAtInterval = damageDealtProgressively.Value;
+            damageDealtProgressively.SettingChanged += delegate
+            {
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.DamageDealtAtInterval = damageDealtProgressively.Value;
+                }
             };
 
             // Slider for seconds until Bracken can try to attack another person after dropping/being hit
-            ConfigEntry<int> distanceAutoKillerEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Distance For Kill", 5, "How far should the Bracken be from its favorite spot to initiate a kill?");
+            ConfigEntry<int> distanceAutoKillerEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Distance For Kill", 1, "How far should the Bracken be from its favorite spot to initiate a kill?");
             IntSliderOptions distanceAutoKillerOptions = new IntSliderOptions
             {
                 RequiresRestart = false,
@@ -161,7 +245,10 @@ namespace SnatchinBracken
             SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
             distanceAutoKillerEntry.SettingChanged += delegate
             {
-                SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
+                }
             };
 
             // Should the Bracken instakill if the player is alone
@@ -171,7 +258,10 @@ namespace SnatchinBracken
             SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
             instaKillOption.SettingChanged += delegate
             {
-                SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
+                }
             };
 
             mls.LogInfo("Config finished parsing");

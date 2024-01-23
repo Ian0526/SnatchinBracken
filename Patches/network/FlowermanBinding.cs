@@ -38,6 +38,19 @@ namespace SnatchingBracken.Patches.network
             UpdateFavoriteSpotClientRpc(playerId, flowermanId);
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        public void DamagePlayerServerRpc(int playerId, int damage)
+        {
+            DamagePlayerClientRpc(playerId, damage);
+        }
+
+        [ClientRpc]
+        public void DamagePlayerClientRpc(int playerId, int damage)
+        {
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
+            player.DamagePlayer(damage, true, true, CauseOfDeath.Suffocation);
+        }
+
         [ClientRpc]
         public void ResetEntityStatesClientRpc(int playerId, ulong flowermanId)
         {
@@ -56,8 +69,11 @@ namespace SnatchingBracken.Patches.network
             flowermanAI.isInAngerMode = false;
             flowermanAI.timesThreatened = 0;
             flowermanAI.evadeStealthTimer = 0.1f;
+            flowermanAI.inSpecialAnimationWithPlayer = null;
+            flowermanAI.inSpecialAnimation = false;
             // little did i know this one is extremely important
-            flowermanAI.isClientCalculatingAI = false;
+            flowermanAI.isClientCalculatingAI = true;
+            flowermanAI.agent.enabled = true;
             flowermanAI.favoriteSpot = null;
             flowermanAI.FinishKillAnimation(false);
         }
@@ -73,7 +89,6 @@ namespace SnatchingBracken.Patches.network
             flowermanAI.carryingPlayerBody = true;
 
             player.inSpecialInteractAnimation = true;
-            player.inAnimationWithEnemy = flowermanAI;
 
             flowermanAI.inKillAnimation = false;
             flowermanAI.targetPlayer = null;
@@ -109,6 +124,7 @@ namespace SnatchingBracken.Patches.network
 
             SharedData.Instance.BindedDrags.Remove(flowermanAI);
             SharedData.Instance.LastGrabbedTimeStamp[flowermanAI] = Time.time;
+            SharedData.Instance.DroppedTimestamp[player] = Time.time;
         }
 
         public override void OnNetworkSpawn()

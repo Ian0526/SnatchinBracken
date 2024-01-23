@@ -5,6 +5,8 @@ using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using SnatchingBracken.Patches.tasks;
 
 namespace SnatchinBracken.Patches
 {
@@ -20,6 +22,43 @@ namespace SnatchinBracken.Patches
         static BrackenAIPatch()
         {
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EnemyAI), "ChooseFarthestNodeFromPosition")]
+        static void FarthestNodeAdjustment(EnemyAI __instance, ref Transform __result, Vector3 pos, bool avoidLineOfSight = false, int offset = 0, bool log = false)
+        {
+            if (__instance is FlowermanAI flowermanAI)
+            {
+                if (SharedData.Instance.BrackenRoomPosition && __result != null)
+                {
+                    if (__instance.SetDestinationToPosition(SharedData.Instance.BrackenRoomPosition.position, true))
+                    {
+                        __result = SharedData.Instance.BrackenRoomPosition;
+                        return;
+                    }
+                    if (__instance.SetDestinationToPosition(__result.position, checkForPath: true))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("Start")]
+        static void PostfixStart(FlowermanAI __instance)
+        {
+            if (__instance.IsHost || __instance.IsServer)
+            {
+                __instance.gameObject.AddComponent<FlowermanLocationTask>();
+            }
+
+            // run check for all
+            if (SharedData.Instance.BrackenRoomPosition != null && SharedData.Instance.BrackenRoom)
+            {
+                __instance.favoriteSpot = SharedData.Instance.BrackenRoomPosition;
+            }
         }
 
         [HarmonyPrefix]
@@ -75,16 +114,21 @@ namespace SnatchinBracken.Patches
                 DropDoubleHandedItem(player);
             }
 
-            Rigidbody[] componentsInChildren = player.gameObject.GetComponentsInChildren<Rigidbody>();
-            for (int i = 0; i < componentsInChildren.Length; i++)
-            {
-                componentsInChildren[i].isKinematic = false;
-                mls.LogInfo("The component's name is:" + componentsInChildren[i].name);
-            }
-
             player.GetComponent<FlowermanBinding>().PrepForBindingServerRpc(playerObjectId, __instance.NetworkObjectId);
             player.GetComponent<FlowermanBinding>().BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
             player.GetComponent<FlowermanBinding>().UpdateFavoriteSpotServerRpc(playerObjectId, __instance.NetworkObjectId);
+
+            FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
+            if (task != null && !SharedData.Instance.DoDamageOnInterval)
+            {
+                task.StartCheckStuckCoroutine(__instance, player);
+            }
+
+            if (!SharedData.Instance.CoroutineStarted.ContainsKey(__instance) && SharedData.Instance.DoDamageOnInterval)
+            {
+                __instance.StartCoroutine(DoGradualDamage(__instance, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
+                SharedData.Instance.CoroutineStarted[__instance] = true;
+            }
 
             __instance.SwitchToBehaviourStateOnLocalClient(1);
             if (__instance.IsServer)
@@ -116,21 +160,78 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPrePatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
         {
+            if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
+            {
+                PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
+                StopGradualDamageCoroutine(__instance, player);
+            }
+
             if (!__instance.IsHost && !__instance.IsServer)
             {
                 return;
             }
+
             if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
+                mls.LogInfo("Hit bracken, dropping");
                 PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
                 int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
-                SharedData.UpdateTimestampNow(__instance);
+                SharedData.UpdateTimestampNow(__instance, player);
+                FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
+                if (task != null)
+                {
+                    task.StopCheckStuckCoroutine();
+                }
                 ManuallyDropPlayerOnHit(__instance, player);
 
                 player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                 player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
                 JustProcessed.Add(__instance);
             }
+        }
+
+        static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
+        {
+            while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
+            {
+                yield return new WaitForSeconds(damageInterval);
+
+                if (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
+                {
+                    if (player.health - damageAmount <= 0)
+                    {
+                        StopGradualDamageCoroutine(flowermanAI, player);
+                        int id = SharedData.Instance.PlayerIDs[player];
+                        SharedData.UpdateTimestampNow(flowermanAI, player);
+                        FinishKillAnimationNormally(flowermanAI, player, id);
+                    }
+                    else
+                    {
+                        int id = SharedData.Instance.PlayerIDs[player];
+                        player.GetComponent<FlowermanBinding>().DamagePlayerServerRpc(id, damageAmount);
+                    }
+
+                    mls.LogInfo($"Damage applied to player: {damageAmount}");
+                } 
+                else
+                {
+                    StopGradualDamageCoroutine(flowermanAI, player);
+                }
+            }
+        }
+
+        static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
+        {
+            if (SharedData.Instance.CoroutineStarted.ContainsKey(flowermanAI))
+            {
+                flowermanAI.StopCoroutine(DoGradualDamage(flowermanAI, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
+                SharedData.Instance.CoroutineStarted.Remove(flowermanAI);
+            }
+        }
+
+        static void DoDamage(PlayerControllerB player, int damageAmount)
+        {
+            player.DamagePlayer(damageAmount, true, true, CauseOfDeath.Mauling);
         }
 
 
@@ -182,15 +283,24 @@ namespace SnatchinBracken.Patches
                 return true;
             }
 
-            player.inSpecialInteractAnimation = false;
-            player.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
+            if (!SharedData.Instance.DoDamageOnInterval)
+            {
+                player.inSpecialInteractAnimation = false;
+                player.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
 
-            __instance.carryingPlayerBody = false;
-            __instance.bodyBeingCarried = null;
-            __instance.creatureAnimator.SetBool("carryingBody", value: false);
+                FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
+                if (task != null)
+                {
+                    task.StopCheckStuckCoroutine();
+                }
 
-            FinishKillAnimationNormally(__instance, player, (int) id);
+                __instance.carryingPlayerBody = false;
+                __instance.bodyBeingCarried = null;
+                __instance.creatureAnimator.SetBool("carryingBody", value: false);
 
+                // Let the GradualDamage coroutine handle the actual death part if they want gradual
+                FinishKillAnimationNormally(__instance, player, (int)id);
+            }
             return false;
         }
 
