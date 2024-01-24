@@ -30,7 +30,7 @@ namespace SnatchinBracken.Patches
         {
             if (__instance is FlowermanAI flowermanAI)
             {
-                if (SharedData.Instance.BrackenRoomPosition && __result != null)
+                if (SharedData.Instance.BrackenRoomPosition && __result != null && SharedData.Instance.BrackenRoom)
                 {
                     if (__instance.SetDestinationToPosition(SharedData.Instance.BrackenRoomPosition.position, true))
                     {

@@ -4,6 +4,9 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.2.8
+- [Bug Fix] Forgotten boolean for Bracken Room check.
+
 ### 1.2.7
 - [Feature] Config option to force the Bracken to make the famous "Bracken Room" its permanent favorite spot.
 
