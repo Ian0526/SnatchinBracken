@@ -4,6 +4,12 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.0
+- [Bug Fix] Added stuns support.
+
+### 1.2.9
+- [Bug Fix] Flushing maps at dropship leave, not actual ship leave.
+
 ### 1.2.8
 - [Bug Fix] Forgotten boolean for Bracken Room check.
 

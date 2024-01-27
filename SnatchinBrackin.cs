@@ -9,8 +9,6 @@ using LethalConfig.ConfigItems.Options;
 using SnatchinBracken.Patches.data;
 using RuntimeNetcodeRPCValidator;
 using SnatchingBracken.Patches.network;
-using System.Reflection;
-using UnityEngine;
 using GameNetcodeStuff;
 using SnatchingBracken;
 using SnatchingBracken.Patches.dungeon;
@@ -24,7 +22,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.2.8";
+        private const string modVersion = "1.3.0";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
@@ -41,20 +39,6 @@ namespace SnatchinBracken
                 instance = this;
             }
 
-            var types = Assembly.GetExecutingAssembly().GetTypes();
-            foreach (var type in types)
-            {
-                var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                foreach (var method in methods)
-                {
-                    var attributes = method.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false);
-                    if (attributes.Length > 0)
-                    {
-                        method.Invoke(null, null);
-                    }
-                }
-            }
-
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
             mls.LogInfo("Enabling SnatchinBracken");
 
@@ -68,7 +52,7 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(TurretPatch));
             harmony.PatchAll(typeof(PlayerPatch));
             harmony.PatchAll(typeof(DungeonGenPatch));
-            harmony.PatchAll(typeof(ItemDropshipPatch));
+            harmony.PatchAll(typeof(StartOfROundPatch));
 
             netcodeValidator = new NetcodeValidator(modGUID);
             netcodeValidator.PatchAll();
@@ -83,9 +67,9 @@ namespace SnatchinBracken
             LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill.");
 
             // Should players drop items on grab
-            ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin) this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them?");
+            ConfigEntry<bool> dropItemsOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them?");
             BoolCheckBoxConfigItem dropItemsVal = new BoolCheckBoxConfigItem(dropItemsOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) dropItemsVal);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)dropItemsVal);
             SharedData.Instance.DropItems = dropItemsOption.Value;
             dropItemsOption.SettingChanged += delegate
             {
@@ -98,11 +82,11 @@ namespace SnatchinBracken
             // Should players be ignored from Turrets
             ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Turrets on Snatch", true, "Should players be targetable when dragged?");
             BoolCheckBoxConfigItem turretVal = new BoolCheckBoxConfigItem(turretOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) turretVal);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)turretVal);
             SharedData.Instance.IgnoreTurrets = turretOption.Value;
             turretOption.SettingChanged += delegate
             {
-                if (HUDManager.Instance.IsHost ||  HUDManager.Instance.IsServer)
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                 {
                     SharedData.Instance.IgnoreTurrets = turretOption.Value;
                 }
@@ -138,7 +122,7 @@ namespace SnatchinBracken
 
             ConfigEntry<bool> brackenRoomOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Force Set Favorite Location To Bracken Room", true, "If enabled, Brackens' favorite locations will be set to the Bracken room. The room sometimes doesn't spawn, so please don't be alarmed if they don't take you there if this is enabled.");
             BoolCheckBoxConfigItem brackenRoomVal = new BoolCheckBoxConfigItem(brackenRoomOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) brackenRoomVal);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)brackenRoomVal);
             SharedData.Instance.BrackenRoom = brackenRoomOption.Value;
 
             brackenRoomOption.SettingChanged += delegate
@@ -171,7 +155,7 @@ namespace SnatchinBracken
                 Max = 60
             };
             IntSliderConfigItem brackenKillTimeSlider = new IntSliderConfigItem(brackenKillTimeEntry, brackenKillTimeOptions);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) brackenKillTimeSlider);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)brackenKillTimeSlider);
             SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
             brackenKillTimeEntry.SettingChanged += delegate
             {
@@ -241,7 +225,7 @@ namespace SnatchinBracken
                 Max = 60
             };
             IntSliderConfigItem distanceAutoKillerSlider = new IntSliderConfigItem(distanceAutoKillerEntry, distanceAutoKillerOptions);
-            LethalConfigManager.AddConfigItem((BaseConfigItem) distanceAutoKillerSlider);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)distanceAutoKillerSlider);
             SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
             distanceAutoKillerEntry.SettingChanged += delegate
             {
@@ -253,7 +237,7 @@ namespace SnatchinBracken
 
             // Should the Bracken instakill if the player is alone
             ConfigEntry<bool> instaKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Instakill When Alone", true, "Should players be instantly killed if they're alone?");
-            BoolCheckBoxConfigItem instaKillVal = new BoolCheckBoxConfigItem (instaKillOption);
+            BoolCheckBoxConfigItem instaKillVal = new BoolCheckBoxConfigItem(instaKillOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)instaKillVal);
             SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
             instaKillOption.SettingChanged += delegate

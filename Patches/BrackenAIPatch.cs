@@ -138,6 +138,43 @@ namespace SnatchinBracken.Patches
             return false;
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(EnemyAI), "SetEnemyStunned")]
+        static void SetEnemyStunnedPrefix(EnemyAI __instance, bool setToStunned, float setToStunTime = 1f, PlayerControllerB setStunnedByPlayer = null)
+        {
+            if (__instance is FlowermanAI flowermanAI)
+            {
+                if (SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
+                {
+                    PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(flowermanAI);
+                    StopGradualDamageCoroutine(flowermanAI, player);
+                }
+
+                if (!flowermanAI.IsHost && !flowermanAI.IsServer)
+                {
+                    return;
+                }
+
+                if (SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
+                {
+                    mls.LogInfo("Stunned bracken, dropping");
+                    PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(flowermanAI);
+                    int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
+                    SharedData.UpdateTimestampNow(flowermanAI, player);
+                    FlowermanLocationTask task = flowermanAI.gameObject.GetComponent<FlowermanLocationTask>();
+                    if (task != null)
+                    {
+                        task.StopCheckStuckCoroutine();
+                    }
+                    ManuallyDropPlayerOnHit(flowermanAI, player);
+
+                    player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
+                    player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
+                    JustProcessed.Add(flowermanAI);
+                }
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPostPatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
@@ -212,7 +249,7 @@ namespace SnatchinBracken.Patches
                     }
 
                     mls.LogInfo($"Damage applied to player: {damageAmount}");
-                } 
+                }
                 else
                 {
                     StopGradualDamageCoroutine(flowermanAI, player);
