@@ -7,9 +7,12 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using SnatchingBracken.Patches.tasks;
+using System.Runtime.CompilerServices;
+using System;
 
 namespace SnatchinBracken.Patches
 {
+
     [HarmonyPatch(typeof(FlowermanAI))]
     internal class BrackenAIPatch
     {
@@ -75,7 +78,7 @@ namespace SnatchinBracken.Patches
                 return true;
             }
 
-            if (CountAlivePlayers() <= 1 && SharedData.Instance.InstantKillIfAlone)
+            if ((CountAlivePlayers() <= 1 && SharedData.Instance.InstantKillIfAlone) || (RollForChance(SharedData.Instance.PercentChanceForInsta)))
             {
                 return true;
             }
@@ -363,6 +366,18 @@ namespace SnatchinBracken.Patches
             __instance.inSpecialAnimationWithPlayer = playerControllerB;
             playerControllerB.inSpecialInteractAnimation = true;
             __instance.KillPlayerAnimationClientRpc(playerId);
+        }
+
+        static bool RollForChance(int percentChance)
+        {
+            if (percentChance == 0) return false;
+            if (percentChance < 0 || percentChance > 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(percentChance), "Percent chance must be between 0 and 100.");
+            }
+
+            int roll = SharedData.RandomInstance.Next(1, 101);
+            return roll <= percentChance;
         }
 
         static void DropDoubleHandedItem(PlayerControllerB player, bool itemsFall = true, bool disconnecting = false)

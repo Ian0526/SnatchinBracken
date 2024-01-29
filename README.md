@@ -4,6 +4,15 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.3
+- [Bug Fix] Forgot to update the manifest.
+
+### 1.3.2
+- [QOL] Remove LethalConfigAPI as an optional dependency. Use BepInEx's config system be default.
+
+### 1.3.1
+- [Feature] Percent chance for insta kill.
+
 ### 1.3.0
 - [Bug Fix] Added stuns support.
 

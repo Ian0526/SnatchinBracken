@@ -1,6 +1,7 @@
 ﻿using GameNetcodeStuff;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace SnatchinBracken.Patches.data
 {
@@ -8,6 +9,9 @@ namespace SnatchinBracken.Patches.data
     {
         private static SharedData _instance;
         public static SharedData Instance => _instance ?? (_instance = new SharedData());
+
+        private static System.Random _random = new System.Random();
+        public static System.Random RandomInstance => _random;
 
         // Bracken to Player
         public Dictionary<FlowermanAI, PlayerControllerB> BindedDrags { get; } = new Dictionary<FlowermanAI, PlayerControllerB>();
@@ -29,6 +33,7 @@ namespace SnatchinBracken.Patches.data
         public float KillAtTime { get; set; }
         public float SecondsBeforeNextAttempt { get; set; }
         public int DamageDealtAtInterval { get; set; }
+        public int PercentChanceForInsta { get; set; }
         public float DistanceFromFavorite { get; set; }
         public Transform BrackenRoomPosition { get; set; }
 
@@ -38,7 +43,7 @@ namespace SnatchinBracken.Patches.data
             SharedData.Instance.DroppedTimestamp[player] = Time.time;
         }
 
-        public static void FlushMaps()
+        public static void FlushDictionaries()
         {
             SharedData.Instance.BindedDrags.Clear();
             SharedData.Instance.FlowermanIDs.Clear();
