@@ -4,6 +4,9 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.4
+- [Feature] Muffle voice like snare flea.
+
 ### 1.3.3
 - [Bug Fix] Forgot to update the manifest.
 

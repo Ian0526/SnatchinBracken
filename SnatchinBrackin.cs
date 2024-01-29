@@ -9,7 +9,6 @@ using SnatchingBracken.Patches.network;
 using GameNetcodeStuff;
 using SnatchingBracken;
 using SnatchingBracken.Patches.dungeon;
-using SnatchingBracken.Patches.ship;
 using System;
 using System.Linq;
 
@@ -21,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.3.3";
+        private const string modVersion = "1.3.4";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -67,7 +66,7 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(TurretPatch));
             harmony.PatchAll(typeof(PlayerPatch));
             harmony.PatchAll(typeof(DungeonGenPatch));
-            harmony.PatchAll(typeof(SnatchingBracken.Patches.ship.StartOfRound));
+            harmony.PatchAll(typeof(StartOfRound));
 
             netcodeValidator = new NetcodeValidator(modGUID);
             netcodeValidator.PatchAll();

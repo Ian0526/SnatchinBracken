@@ -120,6 +120,7 @@ namespace SnatchinBracken.Patches
             player.GetComponent<FlowermanBinding>().PrepForBindingServerRpc(playerObjectId, __instance.NetworkObjectId);
             player.GetComponent<FlowermanBinding>().BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
             player.GetComponent<FlowermanBinding>().UpdateFavoriteSpotServerRpc(playerObjectId, __instance.NetworkObjectId);
+            player.GetComponent<FlowermanBinding>().MufflePlayerVoiceServerRpc(playerObjectId);
 
             FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
             if (task != null && !SharedData.Instance.DoDamageOnInterval)
@@ -173,6 +174,7 @@ namespace SnatchinBracken.Patches
 
                     player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                     player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
+                    player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
                     JustProcessed.Add(flowermanAI);
                 }
             }
@@ -226,6 +228,7 @@ namespace SnatchinBracken.Patches
 
                 player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                 player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
+                player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
                 JustProcessed.Add(__instance);
             }
         }
@@ -257,6 +260,38 @@ namespace SnatchinBracken.Patches
                 {
                     StopGradualDamageCoroutine(flowermanAI, player);
                 }
+            }
+        }
+
+        static void ApplyVoiceMuffle(PlayerControllerB player)
+        {
+            if (player.currentVoiceChatAudioSource == null)
+            {
+                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
+            }
+            if (player.currentVoiceChatAudioSource != null)
+            {
+                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = 5f;
+                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
+                component.overridingLowPass = true;
+                component.lowPassOverride = 500f;
+                player.voiceMuffledByEnemy = true;
+            }
+        }
+
+        static void RemoveVoiceMuffle(PlayerControllerB player)
+        {
+            if (player.currentVoiceChatAudioSource == null)
+            {
+                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
+            }
+            if (player.currentVoiceChatAudioSource != null)
+            {
+                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = 1f;
+                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
+                component.overridingLowPass = false;
+                component.lowPassOverride = 20000f;
+                player.voiceMuffledByEnemy = false;
             }
         }
 

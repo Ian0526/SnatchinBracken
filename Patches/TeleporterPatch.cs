@@ -40,6 +40,7 @@ namespace SnatchinBracken.Patches
                     ManuallyUnbindPlayer(flowerman, __instance);
                     __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowerman.NetworkObjectId);
                     __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowerman.NetworkObjectId);
+                    __instance.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
                 }
             }
             return true;

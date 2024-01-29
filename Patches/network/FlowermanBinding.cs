@@ -44,6 +44,56 @@ namespace SnatchingBracken.Patches.network
             DamagePlayerClientRpc(playerId, damage);
         }
 
+
+        [ServerRpc(RequireOwnership = false)]
+        public void MufflePlayerVoiceServerRpc(int playerId)
+        {
+            MufflePlayerVoiceClientRpc(playerId);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void UnmufflePlayerVoiceServerRpc(int playerId)
+        {
+            UnmufflePlayerVoiceClientRpc(playerId);
+        }
+
+        [ClientRpc]
+        public void MufflePlayerVoiceClientRpc(int playerId)
+        {
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
+            if (player.currentVoiceChatAudioSource == null)
+            {
+                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
+            }
+            if (player.currentVoiceChatAudioSource != null)
+            {
+                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = 5f;
+                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
+                component.overridingLowPass = true;
+                component.lowPassOverride = 500f;
+                player.voiceMuffledByEnemy = true;
+            }
+        }
+
+
+        [ClientRpc]
+        public void UnmufflePlayerVoiceClientRpc(int playerId)
+        {
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
+            if (player.currentVoiceChatAudioSource == null)
+            {
+                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
+            }
+            if (player.currentVoiceChatAudioSource != null)
+            {
+                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = 1f;
+                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
+                component.overridingLowPass = false;
+                component.lowPassOverride = 20000f;
+                player.voiceMuffledByEnemy = false;
+            }
+        }
+
         [ClientRpc]
         public void DamagePlayerClientRpc(int playerId, int damage)
         {
