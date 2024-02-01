@@ -29,6 +29,7 @@ namespace SnatchinBracken.Patches.data
         public bool ChaoticTendencies { get; set; }
         public bool DoDamageOnInterval { get; set; }
         public bool StuckForceKill { get; set; }
+        public bool monstersIgnorePlayers { get; set; }
         public bool BrackenRoom { get; set; }
         public float KillAtTime { get; set; }
         public float SecondsBeforeNextAttempt { get; set; }

@@ -104,24 +104,30 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("PlayerIsTargetable")]
         static bool PlayerIsTargetablePatch(EnemyAI __instance, PlayerControllerB playerScript, bool cannotBeInShip = false)
         {
-            if (__instance is FlowermanAI flowermanAI)
+            if (SharedData.Instance.monstersIgnorePlayers)
             {
-                if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowermanAI))
+                if (__instance is FlowermanAI flowermanAI)
                 {
-                    if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowermanAI] <= SharedData.Instance.SecondsBeforeNextAttempt)
+                    if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowermanAI))
                     {
-                        return false;
+                        if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowermanAI] <= SharedData.Instance.SecondsBeforeNextAttempt)
+                        {
+                            return false;
+                        }
                     }
-                }
-                return !SharedData.Instance.BindedDrags.ContainsKey(flowermanAI);
+                    return !SharedData.Instance.BindedDrags.ContainsKey(flowermanAI);
 
+                }
+                return !SharedData.Instance.BindedDrags.ContainsValue(playerScript);
             }
-            return !SharedData.Instance.BindedDrags.ContainsValue(playerScript);
+            return true;
         }
 
         static void UpdatePosition(FlowermanAI __instance, PlayerControllerB player)
         {
-            player.transform.position = __instance.transform.position;
+            float distanceInFront = -0.8f;
+            Vector3 newPosition = __instance.transform.position + __instance.transform.forward * distanceInFront;
+            player.transform.position = newPosition;
         }
 
         static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)

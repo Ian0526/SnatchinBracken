@@ -4,6 +4,12 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.6
+- [Feature] Option to make players targetable by other enemies while being dragged.
+
+### 1.3.5
+- [Feature] Move player 0.8m away from Bracken so it appears as if they're being held.
+
 ### 1.3.4
 - [Feature] Muffle voice like snare flea.
 

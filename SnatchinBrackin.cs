@@ -20,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.3.4";
+        private const string modVersion = "1.3.6";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -123,11 +123,20 @@ namespace SnatchinBracken
                     }
                 };
 
-                // Add a new configuration option for stuckForceKill
+                // Players
+                ConfigEntry<bool> monstersIgnorePlayersOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Enemies Ignore Dragged Players", true, "Should players be ignored by other monsters while being dragged?");
+                SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
+                monstersIgnorePlayersOption.SettingChanged += delegate
+                {
+                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                    {
+                        SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
+                    }
+                };
+                
                 ConfigEntry<bool> stuckForceKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Stuck Force Kill", false, "If enabled, Brackens will force kill when stuck at the same spot for at least 5 seconds.");
                 SharedData.Instance.StuckForceKill = stuckForceKillOption.Value;
 
-                // Handle the event when the setting is changed
                 stuckForceKillOption.SettingChanged += delegate
                 {
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
