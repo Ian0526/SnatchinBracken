@@ -20,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.3.6";
+        private const string modVersion = "1.3.7";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -102,7 +102,7 @@ namespace SnatchinBracken
                 };
 
                 // Should players be ignored from Turrets
-                ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Turrets on Snatch", true, "Should players be targetable when dragged?");
+                ConfigEntry<bool> turretOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Ignore Turrets on Snatch", true, "Should players be ignored by turrets when dragged?");
                 SharedData.Instance.IgnoreTurrets = turretOption.Value;
                 turretOption.SettingChanged += delegate
                 {
@@ -120,6 +120,17 @@ namespace SnatchinBracken
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                     {
                         SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
+                    }
+                };
+
+                // Should people be able to teleported if they're being dragged?
+                ConfigEntry<bool> allowDraggedTps = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Allow teleports to save dragged players", true, "Should players be able to be saved through teleportation?");
+                SharedData.Instance.AllowTeleports = allowDraggedTps.Value;
+                allowDraggedTps.SettingChanged += delegate
+                {
+                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                    {
+                        SharedData.Instance.AllowTeleports = allowDraggedTps.Value;
                     }
                 };
 

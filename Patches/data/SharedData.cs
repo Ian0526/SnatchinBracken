@@ -26,6 +26,7 @@ namespace SnatchinBracken.Patches.data
         public bool IgnoreTurrets { get; set; }
         public bool InstantKillIfAlone { get; set; }
         public bool IgnoreMines { get; set; }
+        public bool AllowTeleports { get; set; }
         public bool ChaoticTendencies { get; set; }
         public bool DoDamageOnInterval { get; set; }
         public bool StuckForceKill { get; set; }

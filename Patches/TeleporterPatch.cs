@@ -34,13 +34,19 @@ namespace SnatchinBracken.Patches
                 FlowermanAI flowerman = SearchForCorrelatedFlowerman(__instance);
                 if (flowerman != null)
                 {
-                    int id = SharedData.Instance.PlayerIDs[__instance];
-                    SharedData.UpdateTimestampNow(flowerman, __instance);
-                    flowerman.HitEnemy(1, __instance, false);
-                    ManuallyUnbindPlayer(flowerman, __instance);
-                    __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowerman.NetworkObjectId);
-                    __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowerman.NetworkObjectId);
-                    __instance.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                    if (SharedData.Instance.AllowTeleports)
+                    {
+                        int id = SharedData.Instance.PlayerIDs[__instance];
+                        SharedData.UpdateTimestampNow(flowerman, __instance);
+                        ManuallyUnbindPlayer(flowerman, __instance);
+                        __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowerman.NetworkObjectId);
+                        __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowerman.NetworkObjectId);
+                        __instance.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
             return true;
@@ -71,8 +77,6 @@ namespace SnatchinBracken.Patches
             flowerman.stunnedByPlayer = null;
             flowerman.stunNormalizedTimer = 0f;
             flowerman.favoriteSpot = null;
-
         }
     }
-
 }

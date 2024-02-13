@@ -7,7 +7,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using SnatchingBracken.Patches.tasks;
-using System.Runtime.CompilerServices;
 using System;
 
 namespace SnatchinBracken.Patches
@@ -263,38 +262,6 @@ namespace SnatchinBracken.Patches
             }
         }
 
-        static void ApplyVoiceMuffle(PlayerControllerB player)
-        {
-            if (player.currentVoiceChatAudioSource == null)
-            {
-                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
-            }
-            if (player.currentVoiceChatAudioSource != null)
-            {
-                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = 5f;
-                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
-                component.overridingLowPass = true;
-                component.lowPassOverride = 500f;
-                player.voiceMuffledByEnemy = true;
-            }
-        }
-
-        static void RemoveVoiceMuffle(PlayerControllerB player)
-        {
-            if (player.currentVoiceChatAudioSource == null)
-            {
-                StartOfRound.Instance.RefreshPlayerVoicePlaybackObjects();
-            }
-            if (player.currentVoiceChatAudioSource != null)
-            {
-                player.currentVoiceChatAudioSource.GetComponent<AudioLowPassFilter>().lowpassResonanceQ = 1f;
-                OccludeAudio component = player.currentVoiceChatAudioSource.GetComponent<OccludeAudio>();
-                component.overridingLowPass = false;
-                component.lowPassOverride = 20000f;
-                player.voiceMuffledByEnemy = false;
-            }
-        }
-
         static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
         {
             if (SharedData.Instance.CoroutineStarted.ContainsKey(flowermanAI))
@@ -303,12 +270,6 @@ namespace SnatchinBracken.Patches
                 SharedData.Instance.CoroutineStarted.Remove(flowermanAI);
             }
         }
-
-        static void DoDamage(PlayerControllerB player, int damageAmount)
-        {
-            player.DamagePlayer(damageAmount, true, true, CauseOfDeath.Mauling);
-        }
-
 
         private static int CountAlivePlayers()
         {

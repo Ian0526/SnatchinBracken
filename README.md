@@ -4,6 +4,9 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.7
+- [Feature] Option to disallow TPs while being dragged.
+
 ### 1.3.6
 - [Feature] Option to make players targetable by other enemies while being dragged.
 
@@ -17,7 +20,7 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 - [Bug Fix] Forgot to update the manifest.
 
 ### 1.3.2
-- [QOL] Remove LethalConfigAPI as an optional dependency. Use BepInEx's config system be default.
+- [QOL] Make LethalConfigAPI an optional dependency. Use BepInEx's config system by default.
 
 ### 1.3.1
 - [Feature] Percent chance for insta kill.
