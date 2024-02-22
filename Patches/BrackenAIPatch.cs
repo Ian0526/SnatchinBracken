@@ -107,11 +107,11 @@ namespace SnatchinBracken.Patches
                 }
             }
 
-            if (SharedData.Instance.DropItems)
+            if (SharedData.Instance.DropItems && !(SharedData.Instance.AllowLastAliveAttack && CountAlivePlayers() <= 1))
             {
                 player.DropAllHeldItemsAndSync();
             }
-            else
+            else if (!SharedData.Instance.DropItems)
             {
                 DropDoubleHandedItem(player);
             }

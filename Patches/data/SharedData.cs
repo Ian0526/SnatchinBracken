@@ -32,6 +32,7 @@ namespace SnatchinBracken.Patches.data
         public bool StuckForceKill { get; set; }
         public bool monstersIgnorePlayers { get; set; }
         public bool BrackenRoom { get; set; }
+        public bool AllowLastAliveAttack { get; set; }
         public float KillAtTime { get; set; }
         public float SecondsBeforeNextAttempt { get; set; }
         public int DamageDealtAtInterval { get; set; }

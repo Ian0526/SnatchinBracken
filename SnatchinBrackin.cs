@@ -245,13 +245,24 @@ namespace SnatchinBracken
                 };
 
                 // Should the Bracken instakill if the player is alone
-                ConfigEntry<bool> instaKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Instakill When Alone", true, "Should players be instantly killed if they're alone?");
+                ConfigEntry<bool> instaKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Instakill When Alone", false, "Should players be instantly killed if they're alone?");
                 SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
                 instaKillOption.SettingChanged += delegate
                 {
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                     {
                         SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
+                    }
+                };
+
+                // Should the last player be able to attack back
+                ConfigEntry<bool> lastAliveAttackOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Allow last person to attack back", false, "This will negate drop items on grab, the player who is last alive will be given an opportunity to hit back if they have a weapon.");
+                SharedData.Instance.AllowLastAliveAttack = lastAliveAttackOption.Value;
+                lastAliveAttackOption.SettingChanged += delegate
+                {
+                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                    {
+                        SharedData.Instance.AllowLastAliveAttack = lastAliveAttackOption.Value;
                     }
                 };
             }

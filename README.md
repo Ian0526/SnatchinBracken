@@ -4,6 +4,10 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.8
+- [QOL] Make insta kill when alone false.
+- [Feature] Option for last person alive to keep their items & fight back.
+
 ### 1.3.7
 - [Feature] Option to disallow TPs while being dragged.
 
