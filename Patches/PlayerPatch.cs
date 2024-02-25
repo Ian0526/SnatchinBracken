@@ -2,7 +2,6 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
-using SnatchingBracken.Patches.network;
 using UnityEngine;
 
 namespace SnatchingBracken
