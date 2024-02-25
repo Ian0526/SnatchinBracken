@@ -39,6 +39,7 @@ namespace SnatchinBracken.Patches
                         int id = SharedData.Instance.PlayerIDs[__instance];
                         SharedData.UpdateTimestampNow(flowerman, __instance);
                         ManuallyUnbindPlayer(flowerman, __instance);
+                        flowerman.HitEnemy(0);
                         __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowerman.NetworkObjectId);
                         __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowerman.NetworkObjectId);
                         __instance.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);

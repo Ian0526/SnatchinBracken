@@ -20,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.3.7";
+        private const string modVersion = "1.3.9";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -86,7 +86,7 @@ namespace SnatchinBracken
             {
                 mls.LogInfo("Found LethalConfigAPI, let's use that.");
                 LethalConfigAPIHook.InitializeConfig();
-            } 
+            }
             else
             {
                 mls.LogInfo("LethalConfigAPI not found, using built-in BepInEx config stuff.");
@@ -144,7 +144,7 @@ namespace SnatchinBracken
                         SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
                     }
                 };
-                
+
                 ConfigEntry<bool> stuckForceKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Stuck Force Kill", false, "If enabled, Brackens will force kill when stuck at the same spot for at least 5 seconds.");
                 SharedData.Instance.StuckForceKill = stuckForceKillOption.Value;
 
@@ -252,17 +252,6 @@ namespace SnatchinBracken
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                     {
                         SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
-                    }
-                };
-
-                // Should the last player be able to attack back
-                ConfigEntry<bool> lastAliveAttackOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Allow last person to attack back", false, "This will negate drop items on grab, the player who is last alive will be given an opportunity to hit back if they have a weapon.");
-                SharedData.Instance.AllowLastAliveAttack = lastAliveAttackOption.Value;
-                lastAliveAttackOption.SettingChanged += delegate
-                {
-                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
-                    {
-                        SharedData.Instance.AllowLastAliveAttack = lastAliveAttackOption.Value;
                     }
                 };
             }

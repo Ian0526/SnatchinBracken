@@ -4,6 +4,10 @@ SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly k
 
 ## Changelog
 
+### 1.3.9
+- [Bug Fix] Teleporters now work properly again. Apparent redundant line wasn't actually redundant.
+- [Bug Fix] Removed config option to fight back. This needs more work.
+
 ### 1.3.8
 - [QOL] Make insta kill when alone false.
 - [Feature] Option for last person alive to keep their items & fight back.

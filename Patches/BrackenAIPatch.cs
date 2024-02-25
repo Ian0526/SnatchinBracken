@@ -107,7 +107,7 @@ namespace SnatchinBracken.Patches
                 }
             }
 
-            if (SharedData.Instance.DropItems && !(SharedData.Instance.AllowLastAliveAttack && CountAlivePlayers() <= 1))
+            if (SharedData.Instance.DropItems)
             {
                 player.DropAllHeldItemsAndSync();
             }
