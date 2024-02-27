@@ -2,7 +2,14 @@
 
 SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly killing players on contact, Brackens now capture and drag players to a designated "favorite spot." This change allows teammates a chance to intervene and rescue the captured player.
 
+## Bug Reports/Suggestions
+Add me on Discord @readthisifbad
+
 ## Changelog
+
+### 1.4.0
+- [Feature] Insanity levels are now set to max as soon as player is grabbed & maintained.
+- [Bug Fix] Gradual damage now correctly resets muffled voice state and properly clears entity states.
 
 ### 1.3.9
 - [Bug Fix] Teleporters now work properly again. Apparent redundant line wasn't actually redundant.
