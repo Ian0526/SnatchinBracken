@@ -2,6 +2,7 @@
 using SnatchinBracken.Patches.data;
 using Unity.Netcode;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace SnatchingBracken.Patches.network
 {
@@ -55,6 +56,40 @@ namespace SnatchingBracken.Patches.network
         public void UnmufflePlayerVoiceServerRpc(int playerId)
         {
             UnmufflePlayerVoiceClientRpc(playerId);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void MakeInsaneServerRpc(int playerId, float targetInsanity)
+        {
+            MakeInsaneClientRpc(playerId, targetInsanity);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void GiveChillPillServerRpc(int playerId)
+        {
+            GiveChillPillClientRpc(playerId);
+        }
+
+        [ClientRpc]
+        public void GiveChillPillClientRpc(int playerId)
+        {
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
+            if (player == StartOfRound.Instance.localPlayerController)
+            {
+                player.insanityLevel = 0.0f;
+                StartOfRound.Instance.fearLevelIncreasing = false;
+                StartOfRound.Instance.fearLevel = 0;
+            }
+        }
+
+        [ClientRpc]
+        public void MakeInsaneClientRpc(int playerId, float targetInsanity)
+        {
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
+            if (player == StartOfRound.Instance.localPlayerController)
+            {
+                player.JumpToFearLevel(targetInsanity);
+            }
         }
 
         [ClientRpc]

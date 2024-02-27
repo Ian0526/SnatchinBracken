@@ -13,7 +13,7 @@ namespace SnatchingBracken
 
         public static void InitializeConfig()
         {
-            LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill.");
+            LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill. NONE OF THESE OPTIONS REQUIRE A RESTART!");
 
             // Should players drop items on grab
             ConfigEntry<bool> dropItemsOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them?"));
@@ -112,13 +112,13 @@ namespace SnatchingBracken
             // Players
             ConfigEntry<bool> monstersIgnorePlayersOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Enemies Ignore Dragged Players", true, "Should players be ignored by other monsters while being dragged?"));
             BoolCheckBoxConfigItem monstersIgnoreVal = new BoolCheckBoxConfigItem(monstersIgnorePlayersOption);
-            SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
+            SharedData.Instance.MonstersIgnorePlayers = monstersIgnorePlayersOption.Value;
             LethalConfigManager.AddConfigItem(monstersIgnoreVal);
             monstersIgnorePlayersOption.SettingChanged += delegate
             {
                 if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                 {
-                    SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
+                    SharedData.Instance.MonstersIgnorePlayers = monstersIgnorePlayersOption.Value;
                 }
             };
 

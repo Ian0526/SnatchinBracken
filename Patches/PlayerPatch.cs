@@ -30,5 +30,16 @@ namespace SnatchingBracken
             }
             return true;
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("SetPlayerSanityLevel")]
+        static bool SetSanityLevel(PlayerControllerB __instance)
+        {
+            if (SharedData.Instance.BindedDrags.ContainsValue(__instance))
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

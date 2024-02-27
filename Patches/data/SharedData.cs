@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using SnatchingBracken.Patches.tasks;
 
 namespace SnatchinBracken.Patches.data
 {
@@ -19,7 +20,8 @@ namespace SnatchinBracken.Patches.data
         public Dictionary<PlayerControllerB, int> PlayerIDs { get; } = new Dictionary<PlayerControllerB, int>();
         public Dictionary<int, PlayerControllerB> IDsToPlayerController { get; } = new Dictionary<int, PlayerControllerB>();
         public Dictionary<FlowermanAI, float> LastGrabbedTimeStamp { get; } = new Dictionary<FlowermanAI, float>();
-        public Dictionary<FlowermanAI, bool> CoroutineStarted = new Dictionary<FlowermanAI, bool>();
+        public Dictionary<FlowermanAI, bool> LocationCoroutineStarted = new Dictionary<FlowermanAI, bool>();
+        public Dictionary<FlowermanAI, bool> InsanityCoroutineStarted = new Dictionary<FlowermanAI, bool>();
         public Dictionary<PlayerControllerB, float> DroppedTimestamp = new Dictionary<PlayerControllerB, float>();
 
         public bool DropItems { get; set; }
@@ -30,7 +32,7 @@ namespace SnatchinBracken.Patches.data
         public bool ChaoticTendencies { get; set; }
         public bool DoDamageOnInterval { get; set; }
         public bool StuckForceKill { get; set; }
-        public bool monstersIgnorePlayers { get; set; }
+        public bool MonstersIgnorePlayers { get; set; }
         public bool BrackenRoom { get; set; }
         public bool AllowLastAliveAttack { get; set; }
         public float KillAtTime { get; set; }
@@ -51,7 +53,7 @@ namespace SnatchinBracken.Patches.data
             SharedData.Instance.BindedDrags.Clear();
             SharedData.Instance.FlowermanIDs.Clear();
             SharedData.Instance.LastGrabbedTimeStamp.Clear();
-            SharedData.Instance.CoroutineStarted.Clear();
+            SharedData.Instance.LocationCoroutineStarted.Clear();
             SharedData.Instance.DroppedTimestamp.Clear();
             // we can keep player stuff
         }

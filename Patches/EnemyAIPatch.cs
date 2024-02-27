@@ -66,6 +66,7 @@ namespace SnatchinBracken.Patches
                 {
                     SharedData.UpdateTimestampNow(flowermanAI, player);
                     UnbindPlayerAndBracken(player, flowermanAI);
+                    player.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
                     FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
                     if (task != null)
                     {
@@ -104,7 +105,7 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("PlayerIsTargetable")]
         static bool PlayerIsTargetablePatch(EnemyAI __instance, PlayerControllerB playerScript, bool cannotBeInShip = false)
         {
-            if (SharedData.Instance.monstersIgnorePlayers)
+            if (SharedData.Instance.MonstersIgnorePlayers)
             {
                 if (__instance is FlowermanAI flowermanAI)
                 {
@@ -181,10 +182,10 @@ namespace SnatchinBracken.Patches
 
         static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
         {
-            if (SharedData.Instance.CoroutineStarted.ContainsKey(flowermanAI))
+            if (SharedData.Instance.LocationCoroutineStarted.ContainsKey(flowermanAI))
             {
                 flowermanAI.StopCoroutine(DoGradualDamage(flowermanAI, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
-                SharedData.Instance.CoroutineStarted.Remove(flowermanAI);
+                SharedData.Instance.LocationCoroutineStarted.Remove(flowermanAI);
             }
         }
 
@@ -195,7 +196,7 @@ namespace SnatchinBracken.Patches
 
         static void RemoveDictionaryReferences(FlowermanAI __instance, PlayerControllerB player, int playerId)
         {
-            SharedData.Instance.CoroutineStarted.Remove(__instance);
+            SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
             player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
             player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
         }

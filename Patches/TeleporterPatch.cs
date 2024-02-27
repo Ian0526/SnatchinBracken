@@ -3,6 +3,7 @@ using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
+using SnatchingBracken.Patches.tasks;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -43,6 +44,7 @@ namespace SnatchinBracken.Patches
                         __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowerman.NetworkObjectId);
                         __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowerman.NetworkObjectId);
                         __instance.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                        __instance.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
                     }
                     else
                     {

@@ -20,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.3.9";
+        private const string modVersion = "1.4.0";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -136,12 +136,12 @@ namespace SnatchinBracken
 
                 // Players
                 ConfigEntry<bool> monstersIgnorePlayersOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Enemies Ignore Dragged Players", true, "Should players be ignored by other monsters while being dragged?");
-                SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
+                SharedData.Instance.MonstersIgnorePlayers = monstersIgnorePlayersOption.Value;
                 monstersIgnorePlayersOption.SettingChanged += delegate
                 {
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                     {
-                        SharedData.Instance.monstersIgnorePlayers = monstersIgnorePlayersOption.Value;
+                        SharedData.Instance.MonstersIgnorePlayers = monstersIgnorePlayersOption.Value;
                     }
                 };
 

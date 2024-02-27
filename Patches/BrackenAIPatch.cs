@@ -53,6 +53,8 @@ namespace SnatchinBracken.Patches
         {
             if (__instance.IsHost || __instance.IsServer)
             {
+                // location management should only be done by host, we don't need
+                // redundant coroutines running for everyone
                 __instance.gameObject.AddComponent<FlowermanLocationTask>();
             }
 
@@ -120,6 +122,7 @@ namespace SnatchinBracken.Patches
             player.GetComponent<FlowermanBinding>().BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
             player.GetComponent<FlowermanBinding>().UpdateFavoriteSpotServerRpc(playerObjectId, __instance.NetworkObjectId);
             player.GetComponent<FlowermanBinding>().MufflePlayerVoiceServerRpc(playerObjectId);
+            player.GetComponent<FlowermanBinding>().MakeInsaneServerRpc(playerObjectId, 49.9f);
 
             FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
             if (task != null && !SharedData.Instance.DoDamageOnInterval)
@@ -127,10 +130,10 @@ namespace SnatchinBracken.Patches
                 task.StartCheckStuckCoroutine(__instance, player);
             }
 
-            if (!SharedData.Instance.CoroutineStarted.ContainsKey(__instance) && SharedData.Instance.DoDamageOnInterval)
+            if (!SharedData.Instance.LocationCoroutineStarted.ContainsKey(__instance) && SharedData.Instance.DoDamageOnInterval)
             {
                 __instance.StartCoroutine(DoGradualDamage(__instance, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
-                SharedData.Instance.CoroutineStarted[__instance] = true;
+                SharedData.Instance.LocationCoroutineStarted[__instance] = true;
             }
 
             __instance.SwitchToBehaviourStateOnLocalClient(1);
@@ -174,6 +177,7 @@ namespace SnatchinBracken.Patches
                     player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                     player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
                     player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                    player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
                     JustProcessed.Add(flowermanAI);
                 }
             }
@@ -228,6 +232,8 @@ namespace SnatchinBracken.Patches
                 player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                 player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
                 player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+
                 JustProcessed.Add(__instance);
             }
         }
@@ -245,6 +251,11 @@ namespace SnatchinBracken.Patches
                         StopGradualDamageCoroutine(flowermanAI, player);
                         int id = SharedData.Instance.PlayerIDs[player];
                         SharedData.UpdateTimestampNow(flowermanAI, player);
+
+                        player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
+                        player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                        player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+
                         FinishKillAnimationNormally(flowermanAI, player, id);
                     }
                     else
@@ -264,10 +275,10 @@ namespace SnatchinBracken.Patches
 
         static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
         {
-            if (SharedData.Instance.CoroutineStarted.ContainsKey(flowermanAI))
+            if (SharedData.Instance.LocationCoroutineStarted.ContainsKey(flowermanAI))
             {
                 flowermanAI.StopCoroutine(DoGradualDamage(flowermanAI, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
-                SharedData.Instance.CoroutineStarted.Remove(flowermanAI);
+                SharedData.Instance.LocationCoroutineStarted.Remove(flowermanAI);
             }
         }
 
@@ -298,19 +309,20 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("DropPlayerBody")]
         static bool DropBodyPatch(FlowermanAI __instance)
         {
-            if (!__instance.IsHost && !__instance.IsServer) return true;
 
             if (!SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
                 return true;
             }
 
+            PlayerControllerB player = SharedData.Instance.BindedDrags[__instance];
+            if (!__instance.IsHost && !__instance.IsServer) return true;
+
             if (!SharedData.Instance.ChaoticTendencies && !PrerequisiteKilling(__instance))
             {
                 return false;
             }
 
-            PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
             int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
 
             if (player == null)
