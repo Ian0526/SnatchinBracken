@@ -20,6 +20,7 @@ namespace SnatchinBracken.Patches
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
         }
 
+        // Unbinds the player from the Bracken if they are teleported during the dragging
         [HarmonyPrefix]
         [HarmonyPatch("TeleportPlayer")]
         static bool PrefixTeleportPlayer(PlayerControllerB __instance, Vector3 pos, bool withRotation = false, float rot = 0f, bool allowInteractTrigger = false, bool enableController = true)
@@ -55,6 +56,8 @@ namespace SnatchinBracken.Patches
             return true;
         }
 
+        // Finds the correlated Bracken by comparing the IDs of the dictionary values, ideally I should make
+        // another dictionary inversing the key and values for optimization
         private static FlowermanAI SearchForCorrelatedFlowerman(PlayerControllerB player)
         {
             foreach (var entry in SharedData.Instance.BindedDrags)
@@ -67,6 +70,8 @@ namespace SnatchinBracken.Patches
             return null;
         }
 
+        // Unbinds the player to the Bracken, after the kill is called, patches in the BrackenAIPatch.cs file
+        // will handle RPC methods properly
         private static void ManuallyUnbindPlayer(FlowermanAI flowerman, PlayerControllerB player)
         {
             int playerId = SharedData.Instance.PlayerIDs.GetValueSafe(player);

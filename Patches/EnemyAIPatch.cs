@@ -5,7 +5,6 @@ using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
 using SnatchingBracken.Patches.tasks;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -22,6 +21,7 @@ namespace SnatchinBracken.Patches
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
         }
 
+        // Just initializes the Bracken's network object id
         [HarmonyPostfix]
         [HarmonyPatch("Start")]
         static void FlowermanStart(EnemyAI __instance)
@@ -32,6 +32,7 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // This is the ticker method, handles movement and other general updates about the Bracken
         [HarmonyPrefix]
         [HarmonyPatch("Update")]
         static void UpdatePatcher(EnemyAI __instance)
@@ -77,6 +78,7 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Player's that are bound will indefinitely collide with the Bracken, this prevents it
         [HarmonyPrefix]
         [HarmonyPatch("MeetsStandardPlayerCollisionConditions")]
         static bool OverrideCollisionCheck(EnemyAI __instance, Collider other, bool inKillAnimation = false, bool overrideIsInsideFactoryCheck = false)
@@ -93,6 +95,7 @@ namespace SnatchinBracken.Patches
             return true;
         }
 
+        // Prevents the Bracken from targeting other players when they've bound with one
         [HarmonyPrefix]
         [HarmonyPatch("TargetClosestPlayer")]
         static bool ClosestPlayerPatch(FlowermanAI __instance)
@@ -101,6 +104,7 @@ namespace SnatchinBracken.Patches
             return !SharedData.Instance.BindedDrags.ContainsKey(__instance);
         }
 
+        // Prevents other mobs from targeting the player while being dragged.
         [HarmonyPrefix]
         [HarmonyPatch("PlayerIsTargetable")]
         static bool PlayerIsTargetablePatch(EnemyAI __instance, PlayerControllerB playerScript, bool cannotBeInShip = false)
@@ -124,6 +128,7 @@ namespace SnatchinBracken.Patches
             return true;
         }
 
+        // Sets the player's position to the Bracken's with a minor deviation in the direction the Bracken is holding the player
         static void UpdatePosition(FlowermanAI __instance, PlayerControllerB player)
         {
             float distanceInFront = -0.8f;
@@ -131,6 +136,8 @@ namespace SnatchinBracken.Patches
             player.transform.position = newPosition;
         }
 
+        // Just logic to reset the entity states, I don't even know if this is needed anymore with my RPC methods.
+        // Don't really feel like removing incase it does something important
         static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)
         {
             if (!SharedData.Instance.PlayerIDs.ContainsKey(player))
@@ -155,6 +162,7 @@ namespace SnatchinBracken.Patches
             RemoveDictionaryReferences(__instance, player, id);
         }
 
+        // Provides the gradual damage using a coroutine, occurs every second, handles death when applicable
         static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
         {
             while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
@@ -180,6 +188,7 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Stops the gradual damage coroutine
         static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
         {
             if (SharedData.Instance.LocationCoroutineStarted.ContainsKey(flowermanAI))
@@ -189,11 +198,13 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Does the actual damage to the player, calls a series of RPC methods that updates cross-client
         static void DoDamage(PlayerControllerB player, int damageAmount)
         {
             player.DamagePlayer(damageAmount, true, true, CauseOfDeath.Mauling);
         }
 
+        // Calls RPC methods to unbind the player and the Bracken
         static void RemoveDictionaryReferences(FlowermanAI __instance, PlayerControllerB player, int playerId)
         {
             SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
@@ -201,6 +212,7 @@ namespace SnatchinBracken.Patches
             player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
         }
 
+        // Actually kills the player
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
         {
             __instance.inSpecialAnimationWithPlayer = playerControllerB;

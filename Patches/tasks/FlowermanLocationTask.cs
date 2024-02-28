@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using GameNetcodeStuff;
 using SnatchinBracken.Patches.data;
+using SnatchingBracken.Patches.network;
 using System.Collections;
 using UnityEngine;
 
@@ -55,7 +56,10 @@ namespace SnatchingBracken.Patches.tasks
             SharedData.UpdateTimestampNow(flowermanAI, player);
             int playerId = SharedData.Instance.PlayerIDs[player];
             flowermanAI.inSpecialAnimationWithPlayer = player;
+
             player.inSpecialInteractAnimation = true;
+            player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(playerId);
+
             flowermanAI.KillPlayerAnimationClientRpc(playerId);
         }
     }

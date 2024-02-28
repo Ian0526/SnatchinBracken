@@ -26,6 +26,7 @@ namespace SnatchinBracken.Patches
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
         }
 
+        // Prevents the Bracken AI from choosing another favorite location other than the favorite room, if configured for it
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EnemyAI), "ChooseFarthestNodeFromPosition")]
         static void FarthestNodeAdjustment(EnemyAI __instance, ref Transform __result, Vector3 pos, bool avoidLineOfSight = false, int offset = 0, bool log = false)
@@ -47,6 +48,7 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Adds a MonoHevaiour to Brackens on start, updates the BrackenRoom's position
         [HarmonyPostfix]
         [HarmonyPatch("Start")]
         static void PostfixStart(FlowermanAI __instance)
@@ -65,6 +67,9 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // When the Bracken collides with a player, this prefix method is called to prevent the actual
+        // animation that kills the player. This binds and adjusts the entity states for all the visual stuff
+        // you see
         [HarmonyPrefix]
         [HarmonyPatch("KillPlayerAnimationServerRpc")]
         static bool PrefixKillPlayerAnimationServerRpc(FlowermanAI __instance, int playerObjectId)
@@ -144,6 +149,7 @@ namespace SnatchinBracken.Patches
             return false;
         }
 
+        // Handles the unbinding when a Bracken is stunned during a drag event
         [HarmonyPrefix]
         [HarmonyPatch(typeof(EnemyAI), "SetEnemyStunned")]
         static void SetEnemyStunnedPrefix(EnemyAI __instance, bool setToStunned, float setToStunTime = 1f, PlayerControllerB setStunnedByPlayer = null)
@@ -183,6 +189,8 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Post fix to adjust the Bracken's entity states after they've been hit, we still have a prefix below this method that
+        // handles more stuff
         [HarmonyPostfix]
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPostPatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
@@ -201,6 +209,7 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Handles the unbinding of the player during a drag event if the Bracken is hit by another player
         [HarmonyPrefix]
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPrePatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
@@ -238,6 +247,8 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Also another DoGradualDamage method. I actually already have another method in EnemyAI, so this or the other one needs to be
+        // gutted out. I'll clean up this code later.
         static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
         {
             while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
@@ -282,11 +293,14 @@ namespace SnatchinBracken.Patches
             }
         }
 
+        // Returns the amount of alive players
         private static int CountAlivePlayers()
         {
             return StartOfRound.Instance.livingPlayers;
         }
 
+        // I think this method is copied three times, I should probably put this into a Util so we don't have
+        // repeats
         private static void ManuallyDropPlayerOnHit(FlowermanAI __instance, PlayerControllerB player)
         {
             player.inSpecialInteractAnimation = false;
@@ -305,6 +319,7 @@ namespace SnatchinBracken.Patches
             __instance.FinishKillAnimation(false);
         }
 
+        // Actually handles the killing part, when the Bracken drops the body, we initiate a kill
         [HarmonyPrefix]
         [HarmonyPatch("DropPlayerBody")]
         static bool DropBodyPatch(FlowermanAI __instance)
@@ -352,6 +367,7 @@ namespace SnatchinBracken.Patches
             return false;
         }
 
+        // A series of checks to ensure the player is in a state that they should be killed in
         static bool PrerequisiteKilling(FlowermanAI flowerman)
         {
             if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowerman))
@@ -368,6 +384,7 @@ namespace SnatchinBracken.Patches
             return false;
         }
 
+        // Updates the player and Bracken fields to properly initiate a kill
         static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
         {
             mls.LogInfo("Bracken found good spot to kill, killing player.");
@@ -376,6 +393,7 @@ namespace SnatchinBracken.Patches
             __instance.KillPlayerAnimationClientRpc(playerId);
         }
 
+        // Rolls a chance for instant kill if configured for it, also could be put into a util
         static bool RollForChance(int percentChance)
         {
             if (percentChance == 0) return false;
@@ -388,6 +406,8 @@ namespace SnatchinBracken.Patches
             return roll <= percentChance;
         }
 
+        // Drops a double handed item. If a player is holding a double handed item, their position cannot be updated
+        // while in a "special animation." This is needed
         static void DropDoubleHandedItem(PlayerControllerB player, bool itemsFall = true, bool disconnecting = false)
         {
             if (player.twoHanded)
