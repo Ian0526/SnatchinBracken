@@ -1,5 +1,4 @@
-﻿using BepInEx.Logging;
-using GameNetcodeStuff;
+﻿using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
@@ -10,10 +9,6 @@ namespace SnatchingBracken.Utils
     internal class GeneralUtils
     {
 
-        private const string modGUID = "Ovchinikov.SnatchinBracken.Utils";
-
-        private static ManualLogSource mls;
-
         private static GeneralUtils instance;
 
         public static GeneralUtils Instance
@@ -23,7 +18,6 @@ namespace SnatchingBracken.Utils
                 if (instance == null)
                 {
                     instance = new GeneralUtils();
-                    mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
                 }
                 return instance;
             }
@@ -79,16 +73,17 @@ namespace SnatchingBracken.Utils
         public static void RemoveDictionaryReferences(FlowermanAI __instance, PlayerControllerB player, int playerId)
         {
             SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
-            player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
-            player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
-            player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(playerId);
+
+            FlowermanBinding flowermanBinding = player.gameObject.GetComponent<FlowermanBinding>();
+            flowermanBinding.UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
+            flowermanBinding.ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
+            flowermanBinding.GiveChillPillServerRpc(playerId);
         }
 
         public static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)
         {
             if (!SharedData.Instance.PlayerIDs.ContainsKey(player))
             {
-                mls.LogInfo("There isn't a player bound to this Bracken. That's strange.");
                 return;
             }
             int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
@@ -128,7 +123,6 @@ namespace SnatchingBracken.Utils
         // Updates the player and Bracken fields to properly initiate a kill
         public static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
         {
-            mls.LogInfo("Bracken found good spot to kill, killing player.");
             __instance.inSpecialAnimationWithPlayer = playerControllerB;
             playerControllerB.inSpecialInteractAnimation = true;
             __instance.KillPlayerAnimationClientRpc(playerId);

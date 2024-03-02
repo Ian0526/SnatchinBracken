@@ -124,11 +124,12 @@ namespace SnatchinBracken.Patches
                 DropDoubleHandedItem(player);
             }
 
-            player.GetComponent<FlowermanBinding>().PrepForBindingServerRpc(playerObjectId, __instance.NetworkObjectId);
-            player.GetComponent<FlowermanBinding>().BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
-            player.GetComponent<FlowermanBinding>().UpdateFavoriteSpotServerRpc(playerObjectId, __instance.NetworkObjectId);
-            player.GetComponent<FlowermanBinding>().MufflePlayerVoiceServerRpc(playerObjectId);
-            player.GetComponent<FlowermanBinding>().MakeInsaneServerRpc(playerObjectId, 49.9f);
+            FlowermanBinding flowermanBinding = player.GetComponent<FlowermanBinding>();
+            flowermanBinding.PrepForBindingServerRpc(playerObjectId, __instance.NetworkObjectId);
+            flowermanBinding.BindPlayerServerRpc(playerObjectId, __instance.NetworkObjectId);
+            flowermanBinding.UpdateFavoriteSpotServerRpc(playerObjectId, __instance.NetworkObjectId);
+            flowermanBinding.MufflePlayerVoiceServerRpc(playerObjectId);
+            flowermanBinding.MakeInsaneServerRpc(playerObjectId, 49.9f);
 
             FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
             if (task != null && !SharedData.Instance.DoDamageOnInterval)
@@ -238,10 +239,11 @@ namespace SnatchinBracken.Patches
                 }
                 GeneralUtils.ManuallyDropPlayerOnHit(__instance, player);
 
-                player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
-                player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
-                player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
-                player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+                FlowermanBinding flowermanBindng = player.gameObject.GetComponent<FlowermanBinding>();
+                flowermanBindng.UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
+                flowermanBindng.ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
+                flowermanBindng.UnmufflePlayerVoiceServerRpc(id);
+                flowermanBindng.GiveChillPillServerRpc(id);
 
                 JustProcessed.Add(__instance);
             }
@@ -260,10 +262,6 @@ namespace SnatchinBracken.Patches
                         StopGradualDamageCoroutine(flowermanAI, player);
                         int id = SharedData.Instance.PlayerIDs[player];
                         SharedData.UpdateTimestampNow(flowermanAI, player);
-
-                        player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
-                        player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
-                        player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
 
                         GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, id);
                     }

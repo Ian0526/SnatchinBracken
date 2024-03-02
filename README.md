@@ -7,6 +7,10 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+### 1.4.2
+- [Bug Fix] Log messages removed causing exception.
+- [QOL] More cleanup for my sanity.
+
 ### 1.4.1
 - [Bug Fix] Players killed prematurely while binded will properly clear their bound state.
 - [QOL] Refactor reused lines into a Util.

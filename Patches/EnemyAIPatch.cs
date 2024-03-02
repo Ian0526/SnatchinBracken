@@ -4,6 +4,7 @@ using HarmonyLib;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
 using SnatchingBracken.Patches.tasks;
+using SnatchingBracken.Utils;
 using System.Collections;
 using UnityEngine;
 
@@ -50,7 +51,7 @@ namespace SnatchinBracken.Patches
 
             if (player.isPlayerDead)
             {
-                UnbindPlayerAndBracken(player, flowermanAI);
+                GeneralUtils.UnbindPlayerAndBracken(player, flowermanAI);
                 return;
             }
 
@@ -66,14 +67,14 @@ namespace SnatchinBracken.Patches
                 if ((Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime) || (distance <= SharedData.Instance.DistanceFromFavorite)) && !SharedData.Instance.DoDamageOnInterval)
                 {
                     SharedData.UpdateTimestampNow(flowermanAI, player);
-                    UnbindPlayerAndBracken(player, flowermanAI);
+                    GeneralUtils.UnbindPlayerAndBracken(player, flowermanAI);
                     player.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
                     FlowermanLocationTask task = __instance.gameObject.GetComponent<FlowermanLocationTask>();
                     if (task != null)
                     {
                         task.StopCheckStuckCoroutine();
                     }
-                    FinishKillAnimationNormally(flowermanAI, player, (int)id);
+                    GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, (int)id);
                 }
             }
         }
@@ -134,91 +135,6 @@ namespace SnatchinBracken.Patches
             float distanceInFront = -0.8f;
             Vector3 newPosition = __instance.transform.position + __instance.transform.forward * distanceInFront;
             player.transform.position = newPosition;
-        }
-
-        // Just logic to reset the entity states, I don't even know if this is needed anymore with my RPC methods.
-        // Don't really feel like removing incase it does something important
-        static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)
-        {
-            if (!SharedData.Instance.PlayerIDs.ContainsKey(player))
-            {
-                mls.LogInfo("There isn't a player bound to this Bracken. That's strange.");
-                return;
-            }
-            int id = SharedData.Instance.PlayerIDs.GetValueSafe(player);
-            player.inSpecialInteractAnimation = false;
-            player.inAnimationWithEnemy = null;
-
-            __instance.carryingPlayerBody = true;
-            __instance.creatureAnimator.SetBool("killing", value: false);
-            __instance.creatureAnimator.SetBool("carryingBody", value: false);
-            __instance.stunnedByPlayer = null;
-            __instance.stunNormalizedTimer = 0f;
-            __instance.angerMeter = 0f;
-            __instance.isInAngerMode = false;
-            __instance.timesThreatened = 0;
-            __instance.FinishKillAnimation(false);
-
-            RemoveDictionaryReferences(__instance, player, id);
-        }
-
-        // Provides the gradual damage using a coroutine, occurs every second, handles death when applicable
-        static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
-        {
-            while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
-            {
-                yield return new WaitForSeconds(damageInterval);
-
-                if (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
-                {
-                    if (player.health - damageAmount <= 0)
-                    {
-                        StopGradualDamageCoroutine(flowermanAI, player);
-                        int id = SharedData.Instance.PlayerIDs[player];
-                        SharedData.UpdateTimestampNow(flowermanAI, player);
-                        FinishKillAnimationNormally(flowermanAI, player, id);
-                    }
-                    else
-                    {
-                        DoDamage(player, damageAmount);
-                    }
-
-                    mls.LogInfo($"Damage applied to player: {damageAmount}");
-                }
-            }
-        }
-
-        // Stops the gradual damage coroutine
-        static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
-        {
-            if (SharedData.Instance.LocationCoroutineStarted.ContainsKey(flowermanAI))
-            {
-                flowermanAI.StopCoroutine(DoGradualDamage(flowermanAI, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
-                SharedData.Instance.LocationCoroutineStarted.Remove(flowermanAI);
-            }
-        }
-
-        // Does the actual damage to the player, calls a series of RPC methods that updates cross-client
-        static void DoDamage(PlayerControllerB player, int damageAmount)
-        {
-            player.DamagePlayer(damageAmount, true, true, CauseOfDeath.Mauling);
-        }
-
-        // Calls RPC methods to unbind the player and the Bracken
-        static void RemoveDictionaryReferences(FlowermanAI __instance, PlayerControllerB player, int playerId)
-        {
-            SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
-            player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
-            player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
-            player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(playerId);
-        }
-
-        // Actually kills the player
-        static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
-        {
-            __instance.inSpecialAnimationWithPlayer = playerControllerB;
-            playerControllerB.inSpecialInteractAnimation = true;
-            __instance.KillPlayerAnimationClientRpc(playerId);
         }
     }
 }
