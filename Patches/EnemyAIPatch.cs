@@ -210,6 +210,7 @@ namespace SnatchinBracken.Patches
             SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
             player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
             player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
+            player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(playerId);
         }
 
         // Actually kills the player

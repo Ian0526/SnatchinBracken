@@ -14,6 +14,14 @@ namespace SnatchingBracken.Patches.ship
         {
             SharedData.Instance.BrackenRoomPosition = null;
             SharedData.FlushDictionaries();
+            SharedData.GiveChillPillToAll();
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("openingDoorsSequence")]
+        static void ClearPlayerSanityOnLand(StartOfRound __instance)
+        {
+            SharedData.GiveChillPillToAll();
         }
     }
 }

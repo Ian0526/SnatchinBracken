@@ -2,6 +2,8 @@
 using GameNetcodeStuff;
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
+using SnatchingBracken.Patches.network;
+using SnatchingBracken.Utils;
 using UnityEngine;
 
 namespace SnatchingBracken
@@ -29,6 +31,21 @@ namespace SnatchingBracken
                 return false;
             }
             return true;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("KillPlayer")]
+        static void KillPlayerPatch(PlayerControllerB __instance, Vector3 bodyVelocity, bool spawnBody = true, CauseOfDeath causeOfDeath = CauseOfDeath.Unknown, int deathAnimation = 0)
+        {
+            // player is bound, manually unbind
+            if (SharedData.Instance.BindedDrags.ContainsValue(__instance))
+            {
+                FlowermanAI flowermanAI = GeneralUtils.SearchForCorrelatedFlowerman(__instance);
+                if (flowermanAI != null)
+                {
+                    GeneralUtils.UnbindPlayerAndBracken(__instance, flowermanAI);
+                }
+            }
         }
 
         [HarmonyPrefix]

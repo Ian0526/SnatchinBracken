@@ -7,6 +7,11 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+### 1.4.1
+- [Bug Fix] Players killed prematurely while binded will properly clear their bound state.
+- [QOL] Refactor reused lines into a Util.
+- [QOL] Take majority of sections out of Patches, dedicate own directory for specific class types.
+
 ### 1.4.0
 - [Feature] Insanity levels are now set to max as soon as player is grabbed & maintained.
 - [Bug Fix] Gradual damage now correctly resets muffled voice state and properly clears entity states.

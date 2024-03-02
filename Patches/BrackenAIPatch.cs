@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections;
 using SnatchingBracken.Patches.tasks;
 using System;
+using SnatchingBracken.Utils;
 
 namespace SnatchinBracken.Patches
 {
@@ -178,7 +179,7 @@ namespace SnatchinBracken.Patches
                     {
                         task.StopCheckStuckCoroutine();
                     }
-                    ManuallyDropPlayerOnHit(flowermanAI, player);
+                    GeneralUtils.ManuallyDropPlayerOnHit(flowermanAI, player);
 
                     player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                     player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
@@ -209,7 +210,6 @@ namespace SnatchinBracken.Patches
             }
         }
 
-        // Handles the unbinding of the player during a drag event if the Bracken is hit by another player
         [HarmonyPrefix]
         [HarmonyPatch("HitEnemy")]
         static void HitEnemyPrePatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
@@ -236,7 +236,7 @@ namespace SnatchinBracken.Patches
                 {
                     task.StopCheckStuckCoroutine();
                 }
-                ManuallyDropPlayerOnHit(__instance, player);
+                GeneralUtils.ManuallyDropPlayerOnHit(__instance, player);
 
                 player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
                 player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
@@ -247,8 +247,6 @@ namespace SnatchinBracken.Patches
             }
         }
 
-        // Also another DoGradualDamage method. I actually already have another method in EnemyAI, so this or the other one needs to be
-        // gutted out. I'll clean up this code later.
         static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
         {
             while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
@@ -267,7 +265,7 @@ namespace SnatchinBracken.Patches
                         player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
                         player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
 
-                        FinishKillAnimationNormally(flowermanAI, player, id);
+                        GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, id);
                     }
                     else
                     {
@@ -293,30 +291,9 @@ namespace SnatchinBracken.Patches
             }
         }
 
-        // Returns the amount of alive players
         private static int CountAlivePlayers()
         {
             return StartOfRound.Instance.livingPlayers;
-        }
-
-        // I think this method is copied three times, I should probably put this into a Util so we don't have
-        // repeats
-        private static void ManuallyDropPlayerOnHit(FlowermanAI __instance, PlayerControllerB player)
-        {
-            player.inSpecialInteractAnimation = false;
-            player.inAnimationWithEnemy = null;
-
-            __instance.carryingPlayerBody = false;
-            __instance.creatureAnimator.SetBool("killing", value: false);
-            __instance.creatureAnimator.SetBool("carryingBody", value: false);
-            __instance.angerMeter = 0f;
-            __instance.isInAngerMode = false;
-            __instance.stunnedByPlayer = null;
-            __instance.stunNormalizedTimer = 0f;
-            __instance.evadeStealthTimer = 0.1f;
-            __instance.timesThreatened = 0;
-
-            __instance.FinishKillAnimation(false);
         }
 
         // Actually handles the killing part, when the Bracken drops the body, we initiate a kill
@@ -333,7 +310,7 @@ namespace SnatchinBracken.Patches
             PlayerControllerB player = SharedData.Instance.BindedDrags[__instance];
             if (!__instance.IsHost && !__instance.IsServer) return true;
 
-            if (!SharedData.Instance.ChaoticTendencies && !PrerequisiteKilling(__instance))
+            if (!SharedData.Instance.ChaoticTendencies && !GeneralUtils.PrerequisiteKilling(__instance))
             {
                 return false;
             }
@@ -362,35 +339,9 @@ namespace SnatchinBracken.Patches
                 __instance.creatureAnimator.SetBool("carryingBody", value: false);
 
                 // Let the GradualDamage coroutine handle the actual death part if they want gradual
-                FinishKillAnimationNormally(__instance, player, (int)id);
+                GeneralUtils.FinishKillAnimationNormally(__instance, player, (int)id);
             }
             return false;
-        }
-
-        // A series of checks to ensure the player is in a state that they should be killed in
-        static bool PrerequisiteKilling(FlowermanAI flowerman)
-        {
-            if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowerman))
-            {
-
-                float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowerman];
-                float distance = Vector3.Distance(flowerman.transform.position, flowerman.favoriteSpot.position);
-
-                if (Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime) || (distance <= SharedData.Instance.DistanceFromFavorite))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // Updates the player and Bracken fields to properly initiate a kill
-        static void FinishKillAnimationNormally(FlowermanAI __instance, PlayerControllerB playerControllerB, int playerId)
-        {
-            mls.LogInfo("Bracken found good spot to kill, killing player.");
-            __instance.inSpecialAnimationWithPlayer = playerControllerB;
-            playerControllerB.inSpecialInteractAnimation = true;
-            __instance.KillPlayerAnimationClientRpc(playerId);
         }
 
         // Rolls a chance for instant kill if configured for it, also could be put into a util
