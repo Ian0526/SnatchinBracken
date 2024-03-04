@@ -37,6 +37,7 @@ namespace SnatchingBracken.Utils
             return null;
         }
 
+        // without dictionary removals
         public static void ManuallyUnbindPlayer(FlowermanAI flowerman, PlayerControllerB player)
         {
             int playerId = SharedData.Instance.PlayerIDs.GetValueSafe(player);
@@ -75,9 +76,9 @@ namespace SnatchingBracken.Utils
             SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
 
             FlowermanBinding flowermanBinding = player.gameObject.GetComponent<FlowermanBinding>();
-            flowermanBinding.UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
             flowermanBinding.ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
             flowermanBinding.GiveChillPillServerRpc(playerId);
+            flowermanBinding.UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
         }
 
         public static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)

@@ -13,7 +13,7 @@ namespace SnatchingBracken
 
         public static void InitializeConfig()
         {
-            LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill. NONE OF THESE OPTIONS REQUIRE A RESTART!");
+            LethalConfigManager.SetModDescription("A mod that alters the behavior of the Bracken. The Bracken pulls players into a new spot before performing a kill. DON'T CHANGE SETTINGS WHILE THE BRACKEN IS ACTIVELY GRABBING!");
 
             // Should players drop items on grab
             ConfigEntry<bool> dropItemsOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Drop Items on Snatch", true, "Should players drop their items when a Bracken grabs them?"));
@@ -38,19 +38,6 @@ namespace SnatchingBracken
                 if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                 {
                     SharedData.Instance.IgnoreTurrets = turretOption.Value;
-                }
-            };
-
-            // Should Brackens behave more naturally, meaning faster, more chaotic deaths
-            ConfigEntry<bool> chaoticOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Brackens Behave More Naturally", false, "If enabled, Brackens will perform kills at unpredictable times after an initial drop. Otherwise, the Bracken either must be in distance of the favorite location, or hit the time limit."));
-            BoolCheckBoxConfigItem chaoticVal = new BoolCheckBoxConfigItem(chaoticOption);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)chaoticVal);
-            SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
-            chaoticOption.SettingChanged += delegate
-            {
-                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
-                {
-                    SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
                 }
             };
 
@@ -193,7 +180,7 @@ namespace SnatchingBracken
             };
 
             // Time required for above entry
-            ConfigEntry<int> damageDealtProgressively = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Damage Dealt At Interval", 5, "This only applies if you have \"Do Gradual Damage\" enabled. While dragged, every second this configured amount of damage will be dealt to the player."));
+            ConfigEntry<int> damageDealtProgressively = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Damage Dealt At Interval", 5, "This only applies if you have \"Do Gradual Damage\" enabled. While dragged, every second this configured amount of damage will be dealt to the player. Keep in mind, players still regenerate in critical condition."));
             IntSliderOptions damageDealtProgressivelyOptions = new IntSliderOptions
             {
                 RequiresRestart = false,

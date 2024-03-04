@@ -75,6 +75,7 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("KillPlayerAnimationServerRpc")]
         static bool PrefixKillPlayerAnimationServerRpc(FlowermanAI __instance, int playerObjectId)
         {
+            mls.LogInfo("Running kill Player animation");
             if (!__instance.IsHost && !__instance.IsServer)
             {
                 return true;
@@ -180,6 +181,7 @@ namespace SnatchinBracken.Patches
                     {
                         task.StopCheckStuckCoroutine();
                     }
+                    GeneralUtils.ManuallyUnbindPlayer(flowermanAI, player);
                     GeneralUtils.ManuallyDropPlayerOnHit(flowermanAI, player);
 
                     player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
@@ -213,7 +215,7 @@ namespace SnatchinBracken.Patches
 
         [HarmonyPrefix]
         [HarmonyPatch("HitEnemy")]
-        static void HitEnemyPrePatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
+        static bool HitEnemyPrePatch(FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false)
         {
             if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
@@ -223,7 +225,7 @@ namespace SnatchinBracken.Patches
 
             if (!__instance.IsHost && !__instance.IsServer)
             {
-                return;
+                return true;
             }
 
             if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
@@ -237,6 +239,7 @@ namespace SnatchinBracken.Patches
                 {
                     task.StopCheckStuckCoroutine();
                 }
+                GeneralUtils.ManuallyUnbindPlayer(__instance, player);
                 GeneralUtils.ManuallyDropPlayerOnHit(__instance, player);
 
                 FlowermanBinding flowermanBindng = player.gameObject.GetComponent<FlowermanBinding>();
@@ -246,7 +249,9 @@ namespace SnatchinBracken.Patches
                 flowermanBindng.GiveChillPillServerRpc(id);
 
                 JustProcessed.Add(__instance);
+                // prevents the weird desync behavior, consectuive hits without a dragged player will make it behave normally
             }
+            return true;
         }
 
         static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
@@ -259,11 +264,27 @@ namespace SnatchinBracken.Patches
                 {
                     if (player.health - damageAmount <= 0)
                     {
-                        StopGradualDamageCoroutine(flowermanAI, player);
-                        int id = SharedData.Instance.PlayerIDs[player];
-                        SharedData.UpdateTimestampNow(flowermanAI, player);
 
-                        GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, id);
+                        StopGradualDamageCoroutine(flowermanAI, player);
+                        player.inSpecialInteractAnimation = false;
+                        int id = SharedData.Instance.PlayerIDs[player];
+                        player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowermanAI.NetworkObjectId);
+                        player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
+                        player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                        player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+
+                        FlowermanLocationTask task = flowermanAI.gameObject.GetComponent<FlowermanLocationTask>();
+                        if (task != null)
+                        {
+                            task.StopCheckStuckCoroutine();
+                        }
+
+                        flowermanAI.carryingPlayerBody = false;
+                        flowermanAI.bodyBeingCarried = null;
+                        flowermanAI.creatureAnimator.SetBool("carryingBody", value: false);
+
+                        // Let the GradualDamage coroutine handle the actual death part if they want gradual
+                        GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, (int)id);
                     }
                     else
                     {
@@ -299,16 +320,16 @@ namespace SnatchinBracken.Patches
         [HarmonyPatch("DropPlayerBody")]
         static bool DropBodyPatch(FlowermanAI __instance)
         {
-
+            if (!__instance.carryingPlayerBody || __instance.bodyBeingCarried == null) return false;
             if (!SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
                 return true;
             }
 
             PlayerControllerB player = SharedData.Instance.BindedDrags[__instance];
-            if (!__instance.IsHost && !__instance.IsServer) return true;
+            if ((!__instance.IsHost && !__instance.IsServer) || player == null) return true;
 
-            if (!SharedData.Instance.ChaoticTendencies && !GeneralUtils.PrerequisiteKilling(__instance))
+            if (!GeneralUtils.PrerequisiteKilling(__instance))
             {
                 return false;
             }

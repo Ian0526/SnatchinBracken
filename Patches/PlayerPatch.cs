@@ -44,9 +44,9 @@ namespace SnatchingBracken
                 if (flowermanAI != null)
                 {
                     int id = SharedData.Instance.PlayerIDs[__instance];
-                    __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, __instance.NetworkObjectId);
-                    __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, __instance.NetworkObjectId);
+                    __instance.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
                     __instance.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+                    __instance.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowermanAI.NetworkObjectId);
                 }
             }
         }

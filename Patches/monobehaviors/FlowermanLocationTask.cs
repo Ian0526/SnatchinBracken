@@ -2,6 +2,7 @@
 using GameNetcodeStuff;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
+using SnatchingBracken.Utils;
 using System.Collections;
 using UnityEngine;
 
@@ -51,16 +52,13 @@ namespace SnatchingBracken.Patches.tasks
         private void HandleStuckFlowerman(FlowermanAI flowermanAI, PlayerControllerB player)
         {
             Debug.Log("FlowermanAI is stuck, handling...");
-
             StopCheckStuckCoroutine();
-            SharedData.UpdateTimestampNow(flowermanAI, player);
+
             int playerId = SharedData.Instance.PlayerIDs[player];
-            flowermanAI.inSpecialAnimationWithPlayer = player;
-
-            player.inSpecialInteractAnimation = true;
-            player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(playerId);
-
-            flowermanAI.KillPlayerAnimationClientRpc(playerId);
+            SharedData.UpdateTimestampNow(flowermanAI, player);
+            GeneralUtils.UnbindPlayerAndBracken(player, flowermanAI);
+            player.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(playerId);
+            GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, playerId);
         }
     }
 }

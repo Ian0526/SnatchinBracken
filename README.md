@@ -9,6 +9,10 @@ Add me on Discord @readthisifbad
 
 ### 1.4.2
 - [Bug Fix] Log messages removed causing exception.
+- [Bug Fix] Desync caused after mele & stun attacks.
+- [Bug Fix] Insanity persisting due to extra death causes (E.g. Nutcracker shots)
+- [Bug Fix] Exception caused by dropping body on clients.
+- [QOL] Removed "Chaotic Tendencies" config option.
 - [QOL] More cleanup for my sanity.
 
 ### 1.4.1

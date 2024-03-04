@@ -20,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.4.0";
+        private const string modVersion = "1.4.2";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -109,17 +109,6 @@ namespace SnatchinBracken
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                     {
                         SharedData.Instance.IgnoreTurrets = turretOption.Value;
-                    }
-                };
-
-                // Should Brackens behave more naturally, meaning faster, more chaotic deaths
-                ConfigEntry<bool> chaoticOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Brackens Behave More Naturally", false, "If enabled, Brackens will perform kills at unpredictable times after an initial drop. Otherwise, the Bracken either must be in distance of the favorite location, or hit the time limit.");
-                SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
-                chaoticOption.SettingChanged += delegate
-                {
-                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
-                    {
-                        SharedData.Instance.ChaoticTendencies = chaoticOption.Value;
                     }
                 };
 

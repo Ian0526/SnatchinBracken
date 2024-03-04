@@ -34,17 +34,16 @@ namespace SnatchingBracken.Patches.network
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void UpdateFavoriteSpotServerRpc(int playerId, ulong flowermanId)
-        {
-            UpdateFavoriteSpotClientRpc(playerId, flowermanId);
-        }
-
-        [ServerRpc(RequireOwnership = false)]
         public void DamagePlayerServerRpc(int playerId, int damage)
         {
             DamagePlayerClientRpc(playerId, damage);
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        public void UpdateFavoriteSpotServerRpc(int playerId, ulong flowermanId)
+        {
+            UpdateFavoriteSpotClientRpc(playerId, flowermanId);
+        }
 
         [ServerRpc(RequireOwnership = false)]
         public void MufflePlayerVoiceServerRpc(int playerId)
@@ -68,6 +67,25 @@ namespace SnatchingBracken.Patches.network
         public void GiveChillPillServerRpc(int playerId)
         {
             GiveChillPillClientRpc(playerId);
+        }
+
+        [ClientRpc]
+        public void UpdateFavoriteSpotClientRpc(int playerId, ulong flowermanId)
+        {
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
+            FlowermanAI flowermanAI = SharedData.Instance.FlowermanIDs[flowermanId];
+
+            Transform transform;
+            if (SharedData.Instance.BrackenRoom && SharedData.Instance.BrackenRoomPosition != null)
+            {
+                transform = SharedData.Instance.BrackenRoomPosition;
+            }
+            else
+            {
+                transform = flowermanAI.ChooseFarthestNodeFromPosition(player.transform.position);
+            }
+
+            flowermanAI.favoriteSpot = transform;
         }
 
         [ClientRpc]
@@ -153,11 +171,12 @@ namespace SnatchingBracken.Patches.network
             flowermanAI.angerMeter = 0f;
             flowermanAI.isInAngerMode = false;
             flowermanAI.timesThreatened = 0;
+            flowermanAI.inKillAnimation = false;
             flowermanAI.evadeStealthTimer = 0.1f;
             flowermanAI.inSpecialAnimationWithPlayer = null;
             flowermanAI.inSpecialAnimation = false;
             // little did i know this one is extremely important
-            flowermanAI.isClientCalculatingAI = true;
+            flowermanAI.SetClientCalculatingAI(false);
             flowermanAI.agent.enabled = true;
             flowermanAI.favoriteSpot = null;
             flowermanAI.FinishKillAnimation(false);
@@ -177,16 +196,6 @@ namespace SnatchingBracken.Patches.network
 
             flowermanAI.inKillAnimation = false;
             flowermanAI.targetPlayer = null;
-        }
-
-        [ClientRpc]
-        public void UpdateFavoriteSpotClientRpc(int playerId, ulong flowermanId)
-        {
-            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[playerId];
-            FlowermanAI flowermanAI = SharedData.Instance.FlowermanIDs[flowermanId];
-
-            Transform transform = flowermanAI.ChooseFarthestNodeFromPosition(player.transform.position);
-            flowermanAI.favoriteSpot = transform;
         }
 
         [ClientRpc]

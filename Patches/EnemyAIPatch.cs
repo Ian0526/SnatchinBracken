@@ -6,6 +6,7 @@ using SnatchingBracken.Patches.network;
 using SnatchingBracken.Patches.tasks;
 using SnatchingBracken.Utils;
 using System.Collections;
+using System.Reflection;
 using UnityEngine;
 
 namespace SnatchinBracken.Patches
@@ -85,12 +86,22 @@ namespace SnatchinBracken.Patches
         static bool OverrideCollisionCheck(EnemyAI __instance, Collider other, bool inKillAnimation = false, bool overrideIsInsideFactoryCheck = false)
         {
             if (!__instance.IsHost) return true;
+
             if (!(__instance is FlowermanAI flowerman)) return true;
             if (SharedData.Instance.LastGrabbedTimeStamp.ContainsKey(flowerman))
             {
                 if (Time.time - SharedData.Instance.LastGrabbedTimeStamp[flowerman] <= SharedData.Instance.SecondsBeforeNextAttempt)
                 {
                     return false;
+                }
+                if (__instance.isEnemyDead) return true;
+
+                PlayerControllerB component = other.gameObject.GetComponent<PlayerControllerB>();
+
+                if (component != null && !SharedData.Instance.BindedDrags.ContainsKey(flowerman))
+                {
+                    // this is required because after the initial drop, the first player can't be picked back up????
+                    flowerman.KillPlayerAnimationServerRpc((int) component.playerClientId);
                 }
             }
             return true;
