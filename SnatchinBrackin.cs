@@ -11,6 +11,9 @@ using SnatchingBracken;
 using SnatchingBracken.Patches.dungeon;
 using System;
 using System.Linq;
+using LethalConfig.ConfigItems.Options;
+using LethalConfig.ConfigItems;
+using LethalConfig;
 
 namespace SnatchinBracken
 {
@@ -20,7 +23,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.4.2";
+        private const string modVersion = "1.4.3";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -200,6 +203,23 @@ namespace SnatchinBracken
                     }
                 };
 
+                // Slider for the Bracken's power level
+                ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Chance for Insta Kill", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
+                IntSliderOptions powerLevelOptions = new IntSliderOptions
+                {
+                    RequiresRestart = false,
+                    Min = 1,
+                    Max = 5
+                };
+                SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
+                powerLevelEntry.SettingChanged += delegate
+                {
+                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                    {
+                        SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
+                    }
+                };
+
                 // Should Brackens deal damage over time instead of abruptly killing them after they reach a spot?
                 ConfigEntry<bool> doDamageOnIntervalEntry = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Do Gradual Damage", false, "Should players be hurt gradually while being dragged?");
                 SharedData.Instance.DoDamageOnInterval = doDamageOnIntervalEntry.Value;
@@ -243,6 +263,7 @@ namespace SnatchinBracken
                         SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
                     }
                 };
+
             }
 
             mls.LogInfo("Config finished parsing");

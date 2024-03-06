@@ -147,6 +147,25 @@ namespace SnatchingBracken
                 }
             };
 
+            // Slider for the Bracken's power level
+            ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Chance for Insta Kill", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
+            IntSliderOptions powerLevelOptions = new IntSliderOptions
+            {
+                RequiresRestart = false,
+                Min = 1,
+                Max = 5
+            };
+            IntSliderConfigItem powerLevelSlider = new IntSliderConfigItem(powerLevelEntry, powerLevelOptions);
+            LethalConfigManager.AddConfigItem((BaseConfigItem)powerLevelSlider);
+            SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
+            powerLevelEntry.SettingChanged += delegate
+            {
+                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                {
+                    SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
+                }
+            };
+
             // Slider for seconds until Bracken can try to attack another person after dropping/being hit
             ConfigEntry<int> brackenNextAttemptEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Seconds Until Next Attempt", 5, "Time in seconds until Bracken is allowed to take another victim."));
             IntSliderOptions brackenNextAttemptOptions = new IntSliderOptions

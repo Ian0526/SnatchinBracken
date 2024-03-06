@@ -2,6 +2,8 @@
 using HarmonyLib;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
+using SnatchingBracken.Patches.tasks;
+using System.Collections;
 using UnityEngine;
 
 namespace SnatchingBracken.Utils
@@ -73,12 +75,66 @@ namespace SnatchingBracken.Utils
 
         public static void RemoveDictionaryReferences(FlowermanAI __instance, PlayerControllerB player, int playerId)
         {
-            SharedData.Instance.LocationCoroutineStarted.Remove(__instance);
+            SharedData.Instance.GradualDamageCoroutineStarted.Remove(__instance);
 
             FlowermanBinding flowermanBinding = player.gameObject.GetComponent<FlowermanBinding>();
             flowermanBinding.ResetEntityStatesServerRpc(playerId, __instance.NetworkObjectId);
             flowermanBinding.GiveChillPillServerRpc(playerId);
             flowermanBinding.UnbindPlayerServerRpc(playerId, __instance.NetworkObjectId);
+        }
+
+        public static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
+        {
+            if (SharedData.Instance.GradualDamageCoroutineStarted.ContainsKey(flowermanAI))
+            {
+                flowermanAI.StopCoroutine(DoGradualDamage(flowermanAI, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
+                SharedData.Instance.GradualDamageCoroutineStarted.Remove(flowermanAI);
+            }
+        }
+
+        public static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
+        {
+            while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
+            {
+                yield return new WaitForSeconds(damageInterval);
+
+                if (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
+                {
+                    if (player.health - damageAmount <= 0)
+                    {
+
+                        StopGradualDamageCoroutine(flowermanAI, player);
+                        player.inSpecialInteractAnimation = false;
+                        int id = SharedData.Instance.PlayerIDs[player];
+                        player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowermanAI.NetworkObjectId);
+                        player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
+                        player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
+                        player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+
+                        FlowermanLocationTask task = flowermanAI.gameObject.GetComponent<FlowermanLocationTask>();
+                        if (task != null)
+                        {
+                            task.StopCheckStuckCoroutine();
+                        }
+
+                        flowermanAI.carryingPlayerBody = false;
+                        flowermanAI.bodyBeingCarried = null;
+                        flowermanAI.creatureAnimator.SetBool("carryingBody", value: false);
+
+                        // Let the GradualDamage coroutine handle the actual death part if they want gradual
+                        GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, (int)id);
+                    }
+                    else
+                    {
+                        int id = SharedData.Instance.PlayerIDs[player];
+                        player.GetComponent<FlowermanBinding>().DamagePlayerServerRpc(id, damageAmount);
+                    }
+                }
+                else
+                {
+                    StopGradualDamageCoroutine(flowermanAI, player);
+                }
+            }
         }
 
         public static void UnbindPlayerAndBracken(PlayerControllerB player, FlowermanAI __instance)

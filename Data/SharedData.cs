@@ -21,7 +21,7 @@ namespace SnatchinBracken.Patches.data
         public Dictionary<PlayerControllerB, int> PlayerIDs { get; } = new Dictionary<PlayerControllerB, int>();
         public Dictionary<int, PlayerControllerB> IDsToPlayerController { get; } = new Dictionary<int, PlayerControllerB>();
         public Dictionary<FlowermanAI, float> LastGrabbedTimeStamp { get; } = new Dictionary<FlowermanAI, float>();
-        public Dictionary<FlowermanAI, bool> LocationCoroutineStarted = new Dictionary<FlowermanAI, bool>();
+        public Dictionary<FlowermanAI, bool> GradualDamageCoroutineStarted = new Dictionary<FlowermanAI, bool>();
         public Dictionary<FlowermanAI, bool> InsanityCoroutineStarted = new Dictionary<FlowermanAI, bool>();
         public Dictionary<PlayerControllerB, float> DroppedTimestamp = new Dictionary<PlayerControllerB, float>();
 
@@ -38,6 +38,7 @@ namespace SnatchinBracken.Patches.data
         public float KillAtTime { get; set; }
         public float SecondsBeforeNextAttempt { get; set; }
         public int DamageDealtAtInterval { get; set; }
+        public int BrackenPowerLevel { get; set; }
         public int PercentChanceForInsta { get; set; }
         public float DistanceFromFavorite { get; set; }
         public Transform BrackenRoomPosition { get; set; }
@@ -53,7 +54,7 @@ namespace SnatchinBracken.Patches.data
             SharedData.Instance.BindedDrags.Clear();
             SharedData.Instance.FlowermanIDs.Clear();
             SharedData.Instance.LastGrabbedTimeStamp.Clear();
-            SharedData.Instance.LocationCoroutineStarted.Clear();
+            SharedData.Instance.GradualDamageCoroutineStarted.Clear();
             SharedData.Instance.DroppedTimestamp.Clear();
             // we can keep player stuff
         }

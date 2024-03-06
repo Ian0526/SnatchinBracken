@@ -138,10 +138,10 @@ namespace SnatchinBracken.Patches
                 task.StartCheckStuckCoroutine(__instance, player);
             }
 
-            if (!SharedData.Instance.LocationCoroutineStarted.ContainsKey(__instance) && SharedData.Instance.DoDamageOnInterval)
+            if (!SharedData.Instance.GradualDamageCoroutineStarted.ContainsKey(__instance) && SharedData.Instance.DoDamageOnInterval)
             {
-                __instance.StartCoroutine(DoGradualDamage(__instance, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
-                SharedData.Instance.LocationCoroutineStarted[__instance] = true;
+                __instance.StartCoroutine(GeneralUtils.DoGradualDamage(__instance, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
+                SharedData.Instance.GradualDamageCoroutineStarted[__instance] = true;
             }
 
             __instance.SwitchToBehaviourStateOnLocalClient(1);
@@ -162,7 +162,7 @@ namespace SnatchinBracken.Patches
                 if (SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
                 {
                     PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(flowermanAI);
-                    StopGradualDamageCoroutine(flowermanAI, player);
+                    GeneralUtils.StopGradualDamageCoroutine(flowermanAI, player);
                 }
 
                 if (!flowermanAI.IsHost && !flowermanAI.IsServer)
@@ -220,7 +220,7 @@ namespace SnatchinBracken.Patches
             if (SharedData.Instance.BindedDrags.ContainsKey(__instance))
             {
                 PlayerControllerB player = SharedData.Instance.BindedDrags.GetValueSafe(__instance);
-                StopGradualDamageCoroutine(__instance, player);
+                GeneralUtils.StopGradualDamageCoroutine(__instance, player);
             }
 
             if (!__instance.IsHost && !__instance.IsServer)
@@ -252,62 +252,6 @@ namespace SnatchinBracken.Patches
                 // prevents the weird desync behavior, consectuive hits without a dragged player will make it behave normally
             }
             return true;
-        }
-
-        static IEnumerator DoGradualDamage(FlowermanAI flowermanAI, PlayerControllerB player, float damageInterval, int damageAmount)
-        {
-            while (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
-            {
-                yield return new WaitForSeconds(damageInterval);
-
-                if (!player.isPlayerDead && flowermanAI != null && SharedData.Instance.BindedDrags.ContainsKey(flowermanAI))
-                {
-                    if (player.health - damageAmount <= 0)
-                    {
-
-                        StopGradualDamageCoroutine(flowermanAI, player);
-                        player.inSpecialInteractAnimation = false;
-                        int id = SharedData.Instance.PlayerIDs[player];
-                        player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowermanAI.NetworkObjectId);
-                        player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
-                        player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
-                        player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
-
-                        FlowermanLocationTask task = flowermanAI.gameObject.GetComponent<FlowermanLocationTask>();
-                        if (task != null)
-                        {
-                            task.StopCheckStuckCoroutine();
-                        }
-
-                        flowermanAI.carryingPlayerBody = false;
-                        flowermanAI.bodyBeingCarried = null;
-                        flowermanAI.creatureAnimator.SetBool("carryingBody", value: false);
-
-                        // Let the GradualDamage coroutine handle the actual death part if they want gradual
-                        GeneralUtils.FinishKillAnimationNormally(flowermanAI, player, (int)id);
-                    }
-                    else
-                    {
-                        int id = SharedData.Instance.PlayerIDs[player];
-                        player.GetComponent<FlowermanBinding>().DamagePlayerServerRpc(id, damageAmount);
-                    }
-
-                    mls.LogInfo($"Damage applied to player: {damageAmount}");
-                }
-                else
-                {
-                    StopGradualDamageCoroutine(flowermanAI, player);
-                }
-            }
-        }
-
-        static void StopGradualDamageCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
-        {
-            if (SharedData.Instance.LocationCoroutineStarted.ContainsKey(flowermanAI))
-            {
-                flowermanAI.StopCoroutine(DoGradualDamage(flowermanAI, player, 1.0f, SharedData.Instance.DamageDealtAtInterval));
-                SharedData.Instance.LocationCoroutineStarted.Remove(flowermanAI);
-            }
         }
 
         private static int CountAlivePlayers()

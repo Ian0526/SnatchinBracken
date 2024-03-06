@@ -30,6 +30,7 @@ namespace SnatchinBracken.Patches
         {
             if (__instance is FlowermanAI flowermanAI)
             {
+                flowermanAI.enemyType.PowerLevel = SharedData.Instance.BrackenPowerLevel;
                 SharedData.Instance.FlowermanIDs[__instance.NetworkObjectId] = flowermanAI;
             }
         }
