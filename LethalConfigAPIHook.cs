@@ -148,7 +148,7 @@ namespace SnatchingBracken
             };
 
             // Slider for the Bracken's power level
-            ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Chance for Insta Kill", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
+            ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Bracken Power Level", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
             IntSliderOptions powerLevelOptions = new IntSliderOptions
             {
                 RequiresRestart = false,
