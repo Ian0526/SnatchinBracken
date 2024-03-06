@@ -7,9 +7,13 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+### 1.4.3
+- [Feature] Adjust the Bracken's power level.
+- [Bug Fix] Gradual damage coroutine end after player is killed by other means outside of the Bracken.
+
 ### 1.4.2
 - [Bug Fix] Log messages removed causing exception.
-- [Bug Fix] Desync caused after melee & stun attacks.
+- [Bug Fix] Desync caused after mele & stun attacks.
 - [Bug Fix] Insanity persisting due to extra death causes (E.g. Nutcracker shots)
 - [Bug Fix] Exception caused by dropping body on clients.
 - [QOL] Removed "Chaotic Tendencies" config option.
