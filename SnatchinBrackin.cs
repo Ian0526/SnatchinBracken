@@ -11,9 +11,6 @@ using SnatchingBracken;
 using SnatchingBracken.Patches.dungeon;
 using System;
 using System.Linq;
-using LethalConfig.ConfigItems.Options;
-using LethalConfig.ConfigItems;
-using LethalConfig;
 
 namespace SnatchinBracken
 {
@@ -205,12 +202,6 @@ namespace SnatchinBracken
 
                 // Slider for the Bracken's power level
                 ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Bracken Power Level", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
-                IntSliderOptions powerLevelOptions = new IntSliderOptions
-                {
-                    RequiresRestart = false,
-                    Min = 1,
-                    Max = 5
-                };
                 SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
                 powerLevelEntry.SettingChanged += delegate
                 {
