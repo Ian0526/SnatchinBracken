@@ -66,7 +66,12 @@ namespace SnatchinBracken.Patches
                 float lastGrabbed = SharedData.Instance.LastGrabbedTimeStamp[flowermanAI];
                 float distance = Vector3.Distance(__instance.transform.position, __instance.favoriteSpot.position);
 
-                if ((Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime) || (distance <= SharedData.Instance.DistanceFromFavorite)) && !SharedData.Instance.DoDamageOnInterval)
+                // if kill based on time is enabled and time criteria is met
+                if (((Time.time - lastGrabbed >= (SharedData.Instance.KillAtTime) && SharedData.Instance.KillBasedOffOfTime) 
+                    // if kill based on distance is enabled and distance criteria is met
+                    || ((distance <= SharedData.Instance.DistanceFromFavorite) && SharedData.Instance.KillBasedOffOfDistance)) 
+                    // and do damage at interval is disabled
+                    && !SharedData.Instance.DoDamageOnInterval)
                 {
                     SharedData.UpdateTimestampNow(flowermanAI, player);
                     GeneralUtils.UnbindPlayerAndBracken(player, flowermanAI);

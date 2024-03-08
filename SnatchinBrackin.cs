@@ -123,7 +123,7 @@ namespace SnatchinBracken
                     }
                 };
 
-                // Players
+                // Should enemies ignore dragged players?
                 ConfigEntry<bool> monstersIgnorePlayersOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Enemies Ignore Dragged Players", true, "Should players be ignored by other monsters while being dragged?");
                 SharedData.Instance.MonstersIgnorePlayers = monstersIgnorePlayersOption.Value;
                 monstersIgnorePlayersOption.SettingChanged += delegate
@@ -134,9 +134,9 @@ namespace SnatchinBracken
                     }
                 };
 
+                // Should the Bracken automatically kill after its been in the same spot for 5 seconds? (This is purely just in case there's a locked door in the way of its pathing)
                 ConfigEntry<bool> stuckForceKillOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Stuck Force Kill", false, "If enabled, Brackens will force kill when stuck at the same spot for at least 5 seconds.");
                 SharedData.Instance.StuckForceKill = stuckForceKillOption.Value;
-
                 stuckForceKillOption.SettingChanged += delegate
                 {
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
@@ -145,9 +145,9 @@ namespace SnatchinBracken
                     }
                 };
 
+                // Should the Bracken's favorite spot be set to the Bracken Room if it's available?
                 ConfigEntry<bool> brackenRoomOption = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Force Set Favorite Location To Bracken Room", true, "If enabled, Brackens' favorite locations will be set to the Bracken room. The room sometimes doesn't spawn, so please don't be alarmed if they don't take you there if this is enabled.");
                 SharedData.Instance.BrackenRoom = brackenRoomOption.Value;
-
                 brackenRoomOption.SettingChanged += delegate
                 {
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
@@ -178,8 +178,19 @@ namespace SnatchinBracken
                     }
                 };
 
+                // Should the Bracken kill players if they hold a player for the set amount of time in "Seconds Until Auto Kill"
+                ConfigEntry<bool> allowSecondsUntilAutoKill = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Allow Seconds Until Auto Kill (Toggles Option Below)", true, "Toggles the setting below, if disabled, the Bracken won't kill based on time (although may still kill if auto stuck is toggled on).");
+                SharedData.Instance.KillBasedOffOfTime = allowSecondsUntilAutoKill.Value;
+                allowSecondsUntilAutoKill.SettingChanged += delegate
+                {
+                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                    {
+                        SharedData.Instance.KillBasedOffOfTime = allowSecondsUntilAutoKill.Value;
+                    }
+                };
+
                 // Slider for seconds until Bracken automatically kills when grabbed
-                ConfigEntry<int> brackenKillTimeEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Seconds Until Auto Kill", 15, "Time in seconds until Bracken automatically kills when grabbed. Range: 1-60 seconds.");
+                ConfigEntry<int> brackenKillTimeEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Seconds Until Auto Kill", 60, "Time in seconds until Bracken automatically kills when grabbed. Range: 1-60 seconds.");
                 SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
                 brackenKillTimeEntry.SettingChanged += delegate
                 {
@@ -233,7 +244,18 @@ namespace SnatchinBracken
                     }
                 };
 
-                // Slider for seconds until Bracken can try to attack another person after dropping/being hit
+                // Should the Bracken kill players based off of its distance from the favorite location?
+                ConfigEntry<bool> allowDistanceBasedKiller = ((BaseUnityPlugin)this).Config.Bind<bool>("SnatchinBracken Settings", "Allow Distance Until Auto Kill (Toggles Option Below)", true, "Toggles the setting below, if disabled, the Bracken won't kill based on distance from favorite spot.");
+                SharedData.Instance.KillBasedOffOfDistance = allowDistanceBasedKiller.Value;
+                allowDistanceBasedKiller.SettingChanged += delegate
+                {
+                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
+                    {
+                        SharedData.Instance.KillBasedOffOfDistance = allowDistanceBasedKiller.Value;
+                    }
+                };
+
+                // Slider for how far the Bracken should be from the favorite spot before it performs its kill
                 ConfigEntry<int> distanceAutoKillerEntry = ((BaseUnityPlugin)this).Config.Bind<int>("SnatchinBracken Settings", "Distance For Kill", 1, "How far should the Bracken be from its favorite spot to initiate a kill?");
                 SharedData.Instance.DistanceFromFavorite = distanceAutoKillerEntry.Value;
                 distanceAutoKillerEntry.SettingChanged += delegate
@@ -254,9 +276,7 @@ namespace SnatchinBracken
                         SharedData.Instance.InstantKillIfAlone = instaKillOption.Value;
                     }
                 };
-
             }
-
             mls.LogInfo("Config finished parsing");
         }
     }
