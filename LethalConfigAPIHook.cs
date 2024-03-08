@@ -130,6 +130,7 @@ namespace SnatchingBracken
             // Should the Bracken kill players if they hold a player for the set amount of time in "Seconds Until Auto Kill"
             ConfigEntry<bool> allowSecondsUntilAutoKill = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Allow Seconds Until Auto Kill (Toggles Option Below)", true, "Toggles the setting below, if disabled, the Bracken won't kill based on time (although may still kill if auto stuck is toggled on)."));
             BoolCheckBoxConfigItem allowSecondsUntilAutoKillVal = new BoolCheckBoxConfigItem(allowSecondsUntilAutoKill);
+            LethalConfigManager.AddConfigItem(allowSecondsUntilAutoKillVal);
             SharedData.Instance.KillBasedOffOfTime = allowSecondsUntilAutoKill.Value;
             allowSecondsUntilAutoKill.SettingChanged += delegate
             {
@@ -230,7 +231,8 @@ namespace SnatchingBracken
 
             // Should the Bracken kill players based off of its distance from the favorite location?
             ConfigEntry<bool> allowDistanceBasedKiller = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Allow Distance Until Auto Kill (Toggles Option Below)", true, "Toggles the setting below, if disabled, the Bracken won't kill based on distance from favorite spot."));
-            LethalConfigManager.AddConfigItem((BaseConfigItem)damageDealtProgressivelySlider);
+            BoolCheckBoxConfigItem allowDistanceBasedKillerVal = new BoolCheckBoxConfigItem(allowDistanceBasedKiller);
+            LethalConfigManager.AddConfigItem(allowDistanceBasedKillerVal);
             SharedData.Instance.KillBasedOffOfDistance = allowDistanceBasedKiller.Value;
             allowDistanceBasedKiller.SettingChanged += delegate
             {
