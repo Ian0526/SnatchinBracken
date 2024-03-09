@@ -58,7 +58,10 @@ namespace SnatchinBracken.Patches
             {
                 // location management should only be done by host, we don't need
                 // redundant coroutines running for everyone
-                __instance.gameObject.AddComponent<FlowermanLocationTask>();
+                if (SharedData.Instance.StuckForceKill)
+                {
+                    __instance.gameObject.AddComponent<FlowermanLocationTask>();
+                }
             }
 
             // run check for all
