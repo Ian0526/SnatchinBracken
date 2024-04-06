@@ -7,6 +7,17 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+### 1.4.6
+- [Bug Fix] v50 & 49 compatibility
+- [Regression] Removed power level since this field has been moved in v50, will add back when v50 is in release.
+
+### 1.4.5
+- [Bug Fix] Toggle Auto Kill Stuck option with config, this already existed but wasn't implemented properly.
+- [Feature] Toggle Auto Kill on time based.
+- [Feature] Toggle Auto Kill on distance from favorite location.
+- [Note] I wouldn't leave all of three toggled off, players can potentially get stuck if they're the last player left. If you're disabling all three of these, enable the insta kill option for the last player.
+- [Known Issue] Occasionally the Bracken moves incredibly slow, it seems to be about a 10% chance of this happening.
+
 ### 1.4.4
 - [Bug Fix] No Lethal Config reference in main class.
 

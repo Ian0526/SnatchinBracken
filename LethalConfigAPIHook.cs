@@ -4,7 +4,6 @@ using LethalConfig.ConfigItems;
 using LethalConfig;
 using SnatchinBracken.Patches.data;
 using SnatchinBracken;
-using BepInEx;
 
 namespace SnatchingBracken
 {
@@ -41,13 +40,11 @@ namespace SnatchingBracken
                 }
             };
 
-            // Add a new configuration option for stuckForceKill
+            // Should Brackens automatically kill players when they are stuck (path is into a locked door)
             ConfigEntry<bool> stuckForceKillOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Stuck Force Kill", false, "If enabled, Brackens will force kill when stuck at the same spot for at least 5 seconds."));
             BoolCheckBoxConfigItem stuckForceKillVal = new BoolCheckBoxConfigItem(stuckForceKillOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)stuckForceKillVal);
             SharedData.Instance.StuckForceKill = stuckForceKillOption.Value;
-
-            // Handle the event when the setting is changed
             stuckForceKillOption.SettingChanged += delegate
             {
                 if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
@@ -56,6 +53,7 @@ namespace SnatchingBracken
                 }
             };
 
+            // Should the mod force set Bracken's favorite position at the Bracken Room (office looking room)?
             ConfigEntry<bool> brackenRoomOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Force Set Favorite Location To Bracken Room", true, "If enabled, Brackens' favorite locations will be set to the Bracken room. The room sometimes doesn't spawn, so please don't be alarmed if they don't take you there if this is enabled."));
             BoolCheckBoxConfigItem brackenRoomVal = new BoolCheckBoxConfigItem(brackenRoomOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)brackenRoomVal);
@@ -82,7 +80,7 @@ namespace SnatchingBracken
                 }
             };
 
-            // Should players ignore Landmines
+            // Should players & Brackens ignore landmines during a dragon?
             ConfigEntry<bool> mineOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Ignore Mines on Snatch", true, "Should players ignore Landmines while being dragged?"));
             BoolCheckBoxConfigItem mineVal = new BoolCheckBoxConfigItem(mineOption);
             LethalConfigManager.AddConfigItem((BaseConfigItem)mineVal);
@@ -95,7 +93,7 @@ namespace SnatchingBracken
                 }
             };
 
-            // Should players ignore Landmines
+            // Should enemies ignore players who are being dragged?
             ConfigEntry<bool> monstersIgnorePlayersOption = (SnatchinBrackenBase.Instance.Config.Bind<bool>("SnatchinBracken Settings", "Enemies Ignore Dragged Players", true, "Should players be ignored by other monsters while being dragged?"));
             BoolCheckBoxConfigItem monstersIgnoreVal = new BoolCheckBoxConfigItem(monstersIgnorePlayersOption);
             SharedData.Instance.MonstersIgnorePlayers = monstersIgnorePlayersOption.Value;
@@ -156,25 +154,6 @@ namespace SnatchingBracken
                 if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                 {
                     SharedData.Instance.KillAtTime = brackenKillTimeEntry.Value;
-                }
-            };
-
-            // Slider for the Bracken's power level
-            ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Bracken Power Level", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
-            IntSliderOptions powerLevelOptions = new IntSliderOptions
-            {
-                RequiresRestart = false,
-                Min = 1,
-                Max = 5
-            };
-            IntSliderConfigItem powerLevelSlider = new IntSliderConfigItem(powerLevelEntry, powerLevelOptions);
-            LethalConfigManager.AddConfigItem((BaseConfigItem)powerLevelSlider);
-            SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
-            powerLevelEntry.SettingChanged += delegate
-            {
-                if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
-                {
-                    SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
                 }
             };
 

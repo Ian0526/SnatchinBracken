@@ -1,8 +1,6 @@
 ﻿using GameNetcodeStuff;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
-using SnatchingBracken.Patches.tasks;
 using SnatchingBracken.Patches.network;
 
 namespace SnatchinBracken.Patches.data
@@ -38,7 +36,6 @@ namespace SnatchinBracken.Patches.data
         public float KillAtTime { get; set; }
         public float SecondsBeforeNextAttempt { get; set; }
         public int DamageDealtAtInterval { get; set; }
-        public int BrackenPowerLevel { get; set; }
         public int PercentChanceForInsta { get; set; }
         public bool KillBasedOffOfDistance { get; set; }
         public float DistanceFromFavorite { get; set; }

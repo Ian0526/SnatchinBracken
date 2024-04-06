@@ -20,7 +20,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.4.3";
+        private const string modVersion = "1.4.6";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -208,17 +208,6 @@ namespace SnatchinBracken
                     if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
                     {
                         SharedData.Instance.SecondsBeforeNextAttempt = brackenNextAttemptEntry.Value;
-                    }
-                };
-
-                // Slider for the Bracken's power level
-                ConfigEntry<int> powerLevelEntry = (SnatchinBrackenBase.Instance.Config.Bind<int>("SnatchinBracken Settings", "Bracken Power Level", 3, "The Bracken's power level. Each moon has a different Power Level that allows a certain number of monsters to spawn in. Look it up for more information."));
-                SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
-                powerLevelEntry.SettingChanged += delegate
-                {
-                    if (HUDManager.Instance.IsHost || HUDManager.Instance.IsServer)
-                    {
-                        SharedData.Instance.BrackenPowerLevel = powerLevelEntry.Value;
                     }
                 };
 

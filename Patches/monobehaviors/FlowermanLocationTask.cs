@@ -1,5 +1,4 @@
-﻿using BepInEx.Logging;
-using GameNetcodeStuff;
+﻿using GameNetcodeStuff;
 using SnatchinBracken.Patches.data;
 using SnatchingBracken.Patches.network;
 using SnatchingBracken.Utils;
@@ -11,13 +10,6 @@ namespace SnatchingBracken.Patches.tasks
     public class FlowermanLocationTask : MonoBehaviour
     {
         private Coroutine checkStuckCoroutine;
-
-        private static ManualLogSource mls;
-
-        static FlowermanLocationTask()
-        {
-            mls = BepInEx.Logging.Logger.CreateLogSource("Bracken Location Task");
-        }
 
         public void StartCheckStuckCoroutine(FlowermanAI flowermanAI, PlayerControllerB player)
         {
@@ -51,7 +43,6 @@ namespace SnatchingBracken.Patches.tasks
 
         private void HandleStuckFlowerman(FlowermanAI flowermanAI, PlayerControllerB player)
         {
-            Debug.Log("FlowermanAI is stuck, handling...");
             StopCheckStuckCoroutine();
 
             int playerId = SharedData.Instance.PlayerIDs[player];

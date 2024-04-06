@@ -2,7 +2,6 @@
 using SnatchinBracken.Patches.data;
 using Unity.Netcode;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace SnatchingBracken.Patches.network
 {

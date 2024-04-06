@@ -106,10 +106,15 @@ namespace SnatchingBracken.Utils
                         StopGradualDamageCoroutine(flowermanAI, player);
                         player.inSpecialInteractAnimation = false;
                         int id = SharedData.Instance.PlayerIDs[player];
-                        player.gameObject.GetComponent<FlowermanBinding>().UnbindPlayerServerRpc(id, flowermanAI.NetworkObjectId);
-                        player.gameObject.GetComponent<FlowermanBinding>().ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
-                        player.gameObject.GetComponent<FlowermanBinding>().UnmufflePlayerVoiceServerRpc(id);
-                        player.gameObject.GetComponent<FlowermanBinding>().GiveChillPillServerRpc(id);
+
+                        FlowermanBinding flowermanBinding = player.gameObject.GetComponent<FlowermanBinding>();
+                        if (flowermanBinding != null)
+                        {
+                            flowermanBinding.UnbindPlayerServerRpc(id, flowermanAI.NetworkObjectId);
+                            flowermanBinding.ResetEntityStatesServerRpc(id, flowermanAI.NetworkObjectId);
+                            flowermanBinding.UnmufflePlayerVoiceServerRpc(id);
+                            flowermanBinding.GiveChillPillServerRpc(id);
+                        }
 
                         FlowermanLocationTask task = flowermanAI.gameObject.GetComponent<FlowermanLocationTask>();
                         if (task != null)
