@@ -4,23 +4,21 @@ using BepInEx.Logging;
 using HarmonyLib;
 using SnatchinBracken.Patches;
 using SnatchinBracken.Patches.data;
-using RuntimeNetcodeRPCValidator;
-using SnatchingBracken.Patches.network;
-using GameNetcodeStuff;
 using SnatchingBracken;
 using SnatchingBracken.Patches.dungeon;
 using System;
 using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 namespace SnatchinBracken
 {
     [BepInPlugin(modGUID, modName, modVersion)]
-    [BepInDependency("NicholaScott.BepInEx.RuntimeNetcodeRPCValidator", BepInDependency.DependencyFlags.HardDependency)]
     public class SnatchinBrackenBase : BaseUnityPlugin
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.4.6";
+        private const string modVersion = "1.4.7";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance
@@ -32,12 +30,11 @@ namespace SnatchinBracken
 
         private static SnatchinBrackenBase instance;
 
-        private NetcodeValidator netcodeValidator;
-
         internal ManualLogSource mls;
 
         void Awake()
         {
+
             if (instance == null)
             {
                 instance = this;
@@ -68,26 +65,26 @@ namespace SnatchinBracken
             harmony.PatchAll(typeof(DungeonGenPatch));
             harmony.PatchAll(typeof(StartOfRound));
 
-            netcodeValidator = new NetcodeValidator(modGUID);
-            netcodeValidator.PatchAll();
-            netcodeValidator.BindToPreExistingObjectByBehaviour<FlowermanBinding, PlayerControllerB>();
-
             mls.LogInfo("Finished Enabling SnatchinBracken");
+
+            patcher();
         }
 
         private void InitializeConfigValues()
         {
             mls.LogInfo("Parsing SnatchinBracken config");
 
-            bool isLethalConfigAvailable = AppDomain.CurrentDomain.GetAssemblies()
-                .Any(assembly => assembly.GetName().Name.Equals("LethalConfig"));
 
-            if (isLethalConfigAvailable)
+            try
             {
-                mls.LogInfo("Found LethalConfigAPI, let's use that.");
-                LethalConfigAPIHook.InitializeConfig();
+                var isLethalConfigAvailable = AppDomain.CurrentDomain.GetAssemblies()
+                    .Any(a => a.GetName().Name == "LethalConfig");
+                if (isLethalConfigAvailable)
+                {
+                    LethalConfigAPIHook.InitializeConfig();
+                }
             }
-            else
+            catch
             {
                 mls.LogInfo("LethalConfigAPI not found, using built-in BepInEx config stuff.");
                 // Should players drop items on grab
@@ -267,6 +264,22 @@ namespace SnatchinBracken
                 };
             }
             mls.LogInfo("Config finished parsing");
+        }
+        private void patcher()
+        {
+            var types = Assembly.GetExecutingAssembly().GetTypes();
+            foreach (var type in types)
+            {
+                var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                foreach (var method in methods)
+                {
+                    var attributes = method.GetCustomAttributes(typeof(RuntimeInitializeOnLoadMethodAttribute), false);
+                    if (attributes.Length > 0)
+                    {
+                        method.Invoke(null, null);
+                    }
+                }
+            }
         }
     }
 }

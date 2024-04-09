@@ -25,6 +25,26 @@ namespace SnatchingBracken
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch("Awake")]
+        static void onAwake(PlayerControllerB __instance)
+        {
+            if (__instance.gameObject.GetComponent<FlowermanBinding>() == null)
+            {
+                __instance.gameObject.AddComponent<FlowermanBinding>();
+            }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("Start")]
+        static void onStart(PlayerControllerB __instance)
+        {
+            if (__instance.gameObject.GetComponent<FlowermanBinding>() == null)
+            {
+                __instance.gameObject.AddComponent<FlowermanBinding>();
+            }
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch("KillPlayer")]
         static void KillPlayerPatch(PlayerControllerB __instance, Vector3 bodyVelocity, bool spawnBody = true, CauseOfDeath causeOfDeath = CauseOfDeath.Unknown, int deathAnimation = 0)
         {
