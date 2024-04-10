@@ -7,6 +7,9 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+### 1.4.7.1
+- [Bug Fix] Fix loading without LethalConfig
+
 ### 1.4.7
 - [Dependency Adjustment] Remove dependency for Ozone Netcode patcher
 
