@@ -18,7 +18,7 @@ namespace SnatchinBracken
     {
         private const string modGUID = "Ovchinikov.SnatchinBracken.Main";
         private const string modName = "SnatchinBracken";
-        private const string modVersion = "1.4.7.1";
+        private const string modVersion = "1.4.8";
 
         private static SnatchinBrackenBase _instance;
         public static SnatchinBrackenBase Instance

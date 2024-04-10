@@ -7,7 +7,7 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
-### 1.4.7.1
+### 1.4.8
 - [Bug Fix] Fix loading without LethalConfig
 
 ### 1.4.7
