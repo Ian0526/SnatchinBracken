@@ -32,7 +32,6 @@ namespace SnatchinBracken.Patches
                         int id = SharedData.Instance.PlayerIDs[__instance];
                         SharedData.UpdateTimestampNow(flowerman, __instance);
                         GeneralUtils.ManuallyUnbindPlayer(flowerman, __instance);
-                        flowerman.HitEnemy(0);
 
                         FlowermanBinding flowermanBinding = __instance.gameObject.GetComponent<FlowermanBinding>();
                         if (flowermanBinding != null)

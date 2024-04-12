@@ -7,14 +7,18 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+
+### 1.4.9 & 1.5.0
+- [Bug Fix] Fix MoreCompany compatibility.
+
 ### 1.4.8
-- [Bug Fix] Fix loading without LethalConfig
+- [Bug Fix] Fix loading without LethalConfig.
 
 ### 1.4.7
-- [Dependency Adjustment] Remove dependency for Ozone Netcode patcher
+- [Dependency Adjustment] Remove dependency for Ozone Netcode patcher.
 
 ### 1.4.6
-- [Bug Fix] v50 & 49 compatibility
+- [Bug Fix] v50 & 49 compatibility.
 - [Regression] Removed power level since this field has been moved in v50, will add back when v50 is in release.
 
 ### 1.4.5
