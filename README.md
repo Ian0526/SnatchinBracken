@@ -7,6 +7,8 @@ Add me on Discord @readthisifbad
 
 ## Changelog
 
+### 1.5.1
+- [Update] Change method parameters for the farthest tile, v62 support.
 
 ### 1.4.9 & 1.5.0
 - [Bug Fix] Fix MoreCompany compatibility.

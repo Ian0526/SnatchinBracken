@@ -29,7 +29,7 @@ namespace SnatchinBracken.Patches
         // Prevents the Bracken AI from choosing another favorite location other than the favorite room, if configured for it
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EnemyAI), "ChooseFarthestNodeFromPosition")]
-        static void FarthestNodeAdjustment(EnemyAI __instance, ref Transform __result, Vector3 pos, bool avoidLineOfSight = false, int offset = 0, bool log = false)
+        static void FarthestNodeAdjustment(EnemyAI __instance, ref Transform __result, Vector3 pos, bool avoidLineOfSight = false, int offset = 0, bool doAsync = false, int maxAsyncIterations = 50, bool capDistance = false)
         {
             if (__instance is FlowermanAI flowermanAI)
             {
