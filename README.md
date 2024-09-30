@@ -1,6 +1,11 @@
+
 # SnatchinBracken
 
 SnatchinBracken modifies the behavior of Bracken enemies. Instead of instantly killing players on contact, Brackens now capture and drag players to a designated "favorite spot." This change allows teammates a chance to intervene and rescue the captured player.
+
+# Direct Download
+We hit a 1,000,000 downloads! Thanks to the community for providing bug fix feedback over the past year :)
+https://thunderstore.io/c/lethal-company/p/readthisifbad/SnatchinBracken/
 
 ## Bug Reports/Suggestions
 Add me on Discord @readthisifbad
