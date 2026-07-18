@@ -192,7 +192,7 @@ namespace SnatchingBracken.Patches.network
             flowermanAI.carryingPlayerBody = true;
 
             player.inSpecialInteractAnimation = true;
-
+            player.inAnimationWithEnemy = flowermanAI;
             flowermanAI.inKillAnimation = false;
             flowermanAI.targetPlayer = null;
         }
